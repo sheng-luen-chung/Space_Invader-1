@@ -10,7 +10,7 @@ public class SpaceInvader {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        MusicPlayer player = new MusicPlayer();
-        player.playMusic("D:/Github/Space_Invader/music/music1.wav");
+        MusicPlayer musicPlayer = new MusicPlayer();
+        musicPlayer.playMusic("./music/music1.wav", -10.0f);
     }
 }
