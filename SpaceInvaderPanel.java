@@ -12,13 +12,20 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     
     private boolean leftPressed = false;
     private boolean rightPressed = false;
-    private boolean spacePressed = false;
+    private int spacePressed = 0;
+    private boolean escPressed = false;
+    private boolean paused = false;
+    private CardLayout cardLayout;
+    private JPanel cardPanel;
 
-    public SpaceInvaderPanel() {
+    public SpaceInvaderPanel(CardLayout cl, JPanel cp) {
         setPreferredSize(new Dimension(600, 400));
         setBackground(Color.BLACK);
         setFocusable(true);
         addKeyListener(this);
+        // requestFocusInWindow();
+        cardPanel = cp;
+        cardLayout = cl;
 
         timer = new Timer(15, this);
         timer.start();
@@ -48,21 +55,30 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     }
 
     public void actionPerformed(ActionEvent e) {
-        player.move(leftPressed, rightPressed);
-        for(Enemy enemy : enemies) {
-            enemy.move();
-        }
-        for(Bullet bullet : bullets) {
-            bullet.move();
-        }
-        
-        if (spacePressed) {
-            bullets.add(new Bullet(player.getPosition() + 18, 340, 4, 10, Color.yellow));
-            spacePressed = false;
-        }
-        
+        requestFocusInWindow();
+        // System.err.println(escPressed);
+        if(!paused) {
+            player.move(leftPressed, rightPressed);
+            for(Enemy enemy : enemies) {
+                enemy.move();
+            }
+            for(Bullet bullet : bullets) {
+                bullet.move();
+            }
+            
+            if (spacePressed == 1) {
+                bullets.add(new Bullet(player.getPosition() + 18, 340, 4, 10, Color.yellow));
+                spacePressed = 0;
+            }
+            if(escPressed)
+            {
+                pauseGame();
+                escPressed = false;
+                cardLayout.show(cardPanel,"setting");
+            }
+                
         checkCollisions();
-
+        }
         repaint();
     }
 
@@ -83,12 +99,23 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             }
         }
     }
+    public void pauseGame() {
+        paused = true;
+    }
+    public void resumeGame() {
+        paused = false;
+    }
 
     public void keyPressed(KeyEvent e) {
+        System.out.println("Key pressed: " + e.getKeyCode() + spacePressed); 
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT -> leftPressed = true;
             case KeyEvent.VK_RIGHT -> rightPressed = true;
-            case KeyEvent.VK_SPACE -> spacePressed = true;
+            case KeyEvent.VK_SPACE -> {
+                if(spacePressed == 2)
+                    spacePressed = 1;
+            }
+            case KeyEvent.VK_ESCAPE -> escPressed = true;
         }
     }
 
@@ -96,6 +123,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT -> leftPressed = false;
             case KeyEvent.VK_RIGHT -> rightPressed = false;
+            case KeyEvent.VK_SPACE -> spacePressed = 2;
         }
     }
 
