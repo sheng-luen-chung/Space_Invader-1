@@ -17,8 +17,14 @@ public class SettingsPanel extends JPanel {
         JButton backButton = new JButton("返回");
         JButton resume = new JButton("繼續");
         // backButton.setAlignmentX(Component.CENTER_ALIGNMENT); // 水平置中
-        backButton.addActionListener(e -> cardLayout.show(cardPanel,"start"));
-        resume.addActionListener(e -> {cardLayout.show(cardPanel,"game");gamPanel.resumeGame();});
+        backButton.addActionListener(e -> {
+            cardLayout.show(cardPanel,"start");
+            gamPanel.restartGame();
+        });
+        resume.addActionListener(e -> {
+            cardLayout.show(cardPanel,"game");
+            gamPanel.resumeGame();
+        });
 
         // 加入元件與間距
         add(soundCheck);

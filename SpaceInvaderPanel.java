@@ -70,14 +70,13 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 bullets.add(new Bullet(player.getPosition() + 18, 340, 4, 10, Color.yellow));
                 spacePressed = 0;
             }
-            if(escPressed)
-            {
+            if(escPressed) {
                 pauseGame();
                 escPressed = false;
                 cardLayout.show(cardPanel,"setting");
             }
                 
-        checkCollisions();
+            checkCollisions();
         }
         repaint();
     }
@@ -102,7 +101,24 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     public void pauseGame() {
         paused = true;
     }
+
     public void resumeGame() {
+        paused = false;
+    }
+
+    public void restartGame() {
+        player = new Player(250, 350, 40, 10, Color.green);
+    
+        enemies.clear();
+        bullets.clear();
+    
+        spawnEnemies();
+    
+        leftPressed = false;
+        rightPressed = false;
+        spacePressed = 0;
+        escPressed = false;
+    
         paused = false;
     }
 
