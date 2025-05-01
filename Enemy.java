@@ -8,6 +8,16 @@ public class Enemy{
     private int maxHealth = 0;
     private int currentHealth = 0;
 
+    Enemy() {
+        this.x = 100;
+        this.y = 100;
+        this.width = 40;
+        this.height = 40;
+        this.color = Color.RED;
+        this.maxHealth = 100;
+        this.currentHealth = 100;
+    }
+
     Enemy(int x, int y, int w, int h, Color c, int health) {
         this.x = x;
         this.y = y;

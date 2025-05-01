@@ -53,7 +53,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     void spawnEnemies() {
         for (int i = 0; i < Constants.FRAMEWIDTH; i+=120) {
             for (int j = 0; j < 2; j++){
-                enemies.add(new Enemy(60 + i, 100 + j * 50, 30, 30, Color.red, 100));
+                // enemies.add(new Enemy(60 + i, 100 + j * 50, 30, 30, Color.red, 100));
+                enemies.add(new Triangle(60 + i, 100 + j * 50, 30, (int) (30 * 1.732 / 2), Color.red, 100));
             }
         }
     }
@@ -230,7 +231,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             mouseLeftClicked = 2;
         }
         if (SwingUtilities.isRightMouseButton(e)) {
-            mouseLeftClicked = 2;
+            mouseRightClicked = 2;
         }
     }
 
