@@ -1,29 +1,43 @@
 import java.awt.*;
 
 public class Bullet{
-    int x, y, width, height;
+    private double x, y;
+    private int width, height;
     private Color color;
-    private int dx = 1;
-    private int dy = 10;
+    private int speed = 10;
+    private int damage = 20;
+    private double  dx = 0;
+    private double dy = 0;
 
-    Bullet(int x, int y, int w, int h, Color c) {
+    Bullet(int x, int y, int w, int h, Color c, double dx, double dy) {
         this.x = x;
         this.y = y;
         this.width = w;
         this.height = h;
         this.color = c;
+        this.dx = dx;
+        this.dy = dy;
     }
 
     void move() {
-        y -= dy;
+        x += dx * speed;
+        y += dy * speed;
+    }
+
+    int getDamage() {
+        return damage;
+    }
+
+    boolean outOfScreen() {
+        return (x < 0 || x > Constants.FRAMEWIDTH || y < 0 || y > Constants.FRAMEHEIGHT);
     }
 
     void draw(Graphics g) {
         g.setColor(color);
-        g.fillRect(x, y, width, height);
+        g.fillOval((int) x, (int) y, width, height);
     }
 
     Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
+        return new Rectangle((int) x, (int) y, width, height);
     }
 }
