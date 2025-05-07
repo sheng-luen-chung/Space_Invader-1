@@ -1,27 +1,15 @@
 import java.awt.*;
 
 public class Triangle extends Enemy{
-    private double x, y;
     private double centerX = 0;
     private double centerY = 0;
-    private int width, height;
-    private Color color;
-    private int speed = 2;
-    private int maxHealth = 0;
-    private int currentHealth = 0;
     private double dx = 0;
     private double dy = 0;
     private int[] xPoints = new int[3];
     private int[] yPoints = new int[3];
 
     Triangle(int x, int y, int w, int h, Color c, int health) {
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
-        this.color = c;
-        this.maxHealth = health;
-        this.currentHealth = health;
+        super(x, y, w, h, c, health);
         this.xPoints = new int[] {
             (int) (x),
             (int) (x + (double) w / 2),
@@ -34,7 +22,8 @@ public class Triangle extends Enemy{
         };
     }
 
-    void move(double playerX, double playerY) {
+    @Override
+    public void move(double playerX, double playerY) {
         centerX = getCenterX();
         centerY = getCenterY();
         dx = playerX - centerX;
@@ -44,8 +33,15 @@ public class Triangle extends Enemy{
         if (dxdy != 0) {
             dx /= dxdy;
             dy /= dxdy;
-            centerX += dx * speed;
-            centerY += dy * speed;
+            if (knockBackTimer > 0){
+                centerX += knockBackdx * knockBackSpeed;
+                centerY += knockBackdy * knockBackSpeed;
+                knockBackTimer -= 1;
+            }
+            else {
+                centerX += dx * speed;
+                centerY += dy * speed;
+            }
         }
         rotateTri();
     }
@@ -65,11 +61,8 @@ public class Triangle extends Enemy{
         yPoints[2] = (int) (centerY + Math.sin(angle - Math.PI / 3 * 2) * radius);
     }
 
-    void getHurt(int damage) {
-        currentHealth -= damage;
-    }
-
-    void draw(Graphics g) {
+    @Override
+    public void draw(Graphics g) {
         g.setColor(color);
         g.drawPolygon(xPoints, yPoints, 3);
         double healthPercant = (double) currentHealth / maxHealth;
@@ -86,7 +79,8 @@ public class Triangle extends Enemy{
         g.fillPolygon(_xPoints, _yPoints, 3);
     }
 
-    double getCenterX() {
+    @Override
+    public double getCenterX() {
         int xTotal = 0;
         for (int a = 0; a < 3; a++) {
             xTotal += xPoints[a];
@@ -94,7 +88,8 @@ public class Triangle extends Enemy{
         return xTotal / 3.0;
     }
 
-    double getCenterY() {
+    @Override
+    public double getCenterY() {
         int yTotal = 0;
         for (int a = 0; a < 3; a++) {
             yTotal += yPoints[a];
@@ -102,11 +97,13 @@ public class Triangle extends Enemy{
         return yTotal / 3.0;
     }
 
-    double getHealth(){
+    @Override
+    public double getHealth(){
         return currentHealth;
     }
 
-    Rectangle getBounds() {
+    @Override
+    public Rectangle getBounds() {
         return new Rectangle((int) centerX, (int) centerY, width, height);
     }
 }

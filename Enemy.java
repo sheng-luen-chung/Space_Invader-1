@@ -1,14 +1,18 @@
 import java.awt.*;
 
 public class Enemy{
-    private double x, y;
-    private int width, height;
-    private Color color;
-    private int speed = 2;
-    private int maxHealth = 0;
-    private int currentHealth = 0;
+    public double x, y;
+    public int width, height;
+    public Color color;
+    public int speed = 2;
+    public double knockBackdx = 0;
+    public double knockBackdy = 0;
+    public int knockBackSpeed = 2;
+    public int knockBackTimer = 0;
+    public int maxHealth = 0;
+    public int currentHealth = 0;
 
-    Enemy() {
+    public Enemy() {
         this.x = 100;
         this.y = 100;
         this.width = 40;
@@ -18,7 +22,7 @@ public class Enemy{
         this.currentHealth = 100;
     }
 
-    Enemy(int x, int y, int w, int h, Color c, int health) {
+    public Enemy(int x, int y, int w, int h, Color c, int health) {
         this.x = x;
         this.y = y;
         this.width = w;
@@ -28,7 +32,7 @@ public class Enemy{
         this.currentHealth = health;
     }
 
-    void move(double playerX, double playerY) {
+    public void move(double playerX, double playerY) {
         double dx = playerX - getCenterX();
         double dy = playerY - getCenterY();
 
@@ -36,16 +40,33 @@ public class Enemy{
         if (dxdy != 0) {
             dx /= dxdy;
             dy /= dxdy;
-            x += dx * speed;
-            y += dy * speed;
+            if (knockBackTimer > 0){
+                x += dx * knockBackSpeed;
+                y += dy * knockBackSpeed;
+                knockBackTimer -= 1;
+            }
+            else {
+                x += dx * speed;
+                y += dy * speed;
+            }
         }
     }
 
-    void getHurt(int damage) {
+    public void getHurt(int damage) {
         currentHealth -= damage;
     }
 
-    void draw(Graphics g) {
+    public void knockBack(double x, double y, int s, int t) {
+        knockBackdx = getCenterX() - x;
+        knockBackdy = getCenterY() - y;
+        double dxdy = Math.sqrt(knockBackdx * knockBackdx + knockBackdy * knockBackdy);
+        knockBackdx /= dxdy;
+        knockBackdy /= dxdy;
+        knockBackSpeed = s;
+        knockBackTimer = t;
+    }
+
+    public void draw(Graphics g) {
         g.setColor(color);
         double healthPercant = (double) currentHealth / maxHealth;
         double w = healthPercant * width;
@@ -56,19 +77,19 @@ public class Enemy{
         g.fillRect((int) (centerX - w / 2), (int) (centerY - h / 2), (int) w, (int) h);
     }
 
-    double getCenterX() {
+    public double getCenterX() {
         return x + (double) width / 2; 
     }
 
-    double getCenterY() {
+    public double getCenterY() {
         return y + (double) height / 2; 
     }
 
-    double getHealth(){
+    public double getHealth(){
         return currentHealth;
     }
 
-    Rectangle getBounds() {
+    public Rectangle getBounds() {
         return new Rectangle((int) x, (int) y, width, height);
     }
 }

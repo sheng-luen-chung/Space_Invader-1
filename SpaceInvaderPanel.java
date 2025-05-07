@@ -8,6 +8,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     Timer timer;
     ArrayList<Enemy> enemies = new ArrayList<>();
     ArrayList<Bullet> bullets = new ArrayList<>();
+    ArrayList<Explode> explodes = new ArrayList<>();
     Player player;
     
     private boolean paused = false;
@@ -63,11 +64,15 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         super.paintComponent(g);
 
         player.draw(g);
+        PlayerUI.draw(g, player.getMaxHealth(), player.getHealth(), player.getMaxEnergy(), player.getEnergy());
         for(Enemy enemy : enemies) {
             enemy.draw(g);
         }
         for(Bullet bullet : bullets) {
             bullet.draw(g);
+        }
+        for(Explode explode : explodes) {
+            explode.draw(g);
         }
     }
 
@@ -85,16 +90,23 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             deleteOutOfScreenBullets();
 
             if (mouseLeftClicked == 2) {
-                double bulletDx = (double) (leftClickX - player.getCenterX());
-                double bulletDy = (double) (leftClickY - player.getCenterY());
-                double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
-                if (dxdy != 0) {
-                    bulletDx /= dxdy;
-                    bulletDy /= dxdy;
+                if (!player.isAttacking()){
+                    double bulletDx = (double) (leftClickX - player.getCenterX());
+                    double bulletDy = (double) (leftClickY - player.getCenterY());
+                    double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
+                    if (dxdy != 0) {
+                        bulletDx /= dxdy;
+                        bulletDy /= dxdy;
+                    }
+                    bullets.add(new Bullet((int) player.getCenterX() - 10, (int) player.getCenterY() - 10, 20, 20, Color.YELLOW, 
+                                bulletDx, bulletDy));
+                    player.attack();
                 }
-                bullets.add(new Bullet((int) player.getCenterX() - 5, (int) player.getCenterY() - 5, 10, 10, Color.yellow, 
-                            bulletDx, bulletDy));
                 mouseLeftClicked = 0;
+            }
+
+            if (spacePressed) {
+                player.dodge(wPressed, aPressed, sPressed, dPressed);
             }
 
             if(escPressed) {
@@ -117,13 +129,44 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             while (enemy.hasNext()) {
                 Enemy e = enemy.next();
 
-                if (b.getBounds().intersects(e.getBounds())) {
+                Rectangle bRect = b.getBounds();
+                Rectangle eRect = e.getBounds();
+                if (bRect.intersects(eRect)) {
+                    Rectangle intersection = bRect.intersection(eRect);
+                    int collisionX = intersection.x;
+                    int collisionY = intersection.y;
+
+                    explodes.add(new Explode(collisionX, collisionY, b.getWidth(), b.getHeight(), Color.RED, 100));
+
                     bullet.remove();
+                    // e.getHurt(b.getDamage());
+                    // if (e.getHealth() <= 0) {
+                    //     enemy.remove();
+                    // }
+                    break;
+                }
+            }
+        }
+        Iterator<Explode> explode = explodes.iterator();
+        while (explode.hasNext()) {
+            Explode b = explode.next();
+            b.getHurt(20);
+            if (b.getHealth() <= 0) {
+                explode.remove();
+            }
+
+            Iterator<Enemy> enemy = enemies.iterator();
+            while (enemy.hasNext()) {
+                Enemy e = enemy.next();
+
+                Rectangle bRect = b.getBounds();
+                Rectangle eRect = e.getBounds();
+                if (bRect.intersects(eRect)) {
                     e.getHurt(b.getDamage());
+                    e.knockBack(b.getCenterX(), b.getCenterY(), 10, 10);
                     if (e.getHealth() <= 0) {
                         enemy.remove();
                     }
-                    break;
                 }
             }
         }
