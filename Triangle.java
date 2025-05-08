@@ -24,6 +24,29 @@ public class Triangle extends Enemy{
 
     @Override
     public void move(double playerX, double playerY) {
+        switch(state) {
+            case 0 -> stateIdle(playerX, playerY);
+            case 1 -> stateMove(playerX, playerY);
+            case 2 -> stateKnockBack();
+            case 3 -> stateAttack();
+        }
+    }
+
+    @Override
+    public void stateIdle(double playerX, double playerY) {
+        centerX = getCenterX();
+        centerY = getCenterY();
+        dx = playerX - centerX;
+        dy = playerY - centerY;
+
+        double dxdy = Math.sqrt(dx * dx + dy * dy);
+        if (dxdy <= 100) {
+            state = 1;
+        }
+    }
+
+    @Override
+    public void stateMove(double playerX, double playerY) {
         centerX = getCenterX();
         centerY = getCenterY();
         dx = playerX - centerX;
@@ -33,26 +56,43 @@ public class Triangle extends Enemy{
         if (dxdy != 0) {
             dx /= dxdy;
             dy /= dxdy;
-            if (knockBackTimer > 0){
-                centerX += knockBackdx * knockBackSpeed;
-                centerY += knockBackdy * knockBackSpeed;
-                knockBackTimer -= 1;
-            }
-            else {
-                centerX += dx * speed;
-                centerY += dy * speed;
-            }
+            centerX += dx * speed;
+            centerY += dy * speed;
         }
         rotateTri();
     }
-    
-    void rotateTri() {
-        double angle = Math.atan2(dy, dx);
 
+    @Override
+    public void stateKnockBack() {
+        if (knockBackTimer > 0){
+            centerX += knockBackdx * knockBackSpeed;
+            centerY += knockBackdy * knockBackSpeed;
+            knockBackTimer -= 1;
+        }
+        else {
+            state = 1;
+            knockBacking = false;
+        }
+        rotateTri();
+    }
+
+    public void stateAttack() {
+        
+    }
+
+    private void rotateTri() {
+        double angle;
         double radius = height * 2.0 / 3;
 
-        xPoints[0] = (int) (centerX + dx * radius);
-        yPoints[0] = (int) (centerY + dy * radius);
+        if (knockBacking){
+            angle = Math.atan2(knockBackdy, knockBackdx);
+        }
+        else{
+            angle = Math.atan2(dy, dx);
+        }
+
+        xPoints[0] = (int) (centerX + Math.cos(angle) * radius);
+        yPoints[0] = (int) (centerY + Math.sin(angle) * radius);
         
         xPoints[1] = (int) (centerX + Math.cos(angle + Math.PI / 3 * 2) * radius);
         yPoints[1] = (int) (centerY + Math.sin(angle + Math.PI / 3 * 2) * radius);

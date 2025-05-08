@@ -4,4 +4,5 @@ public class Constants {
     public static final int PLAYERWIDTH = 40;
     public static final int PLAYERHEIGHT = 40;
     public static final int PLAYERHEALTH = 100;
+    public static float currentVolume = 10.0f;
 }

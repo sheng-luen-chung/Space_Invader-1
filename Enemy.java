@@ -4,13 +4,20 @@ public class Enemy{
     public double x, y;
     public int width, height;
     public Color color;
-    public int speed = 2;
-    public double knockBackdx = 0;
-    public double knockBackdy = 0;
-    public int knockBackSpeed = 2;
-    public int knockBackTimer = 0;
+    
     public int maxHealth = 0;
     public int currentHealth = 0;
+    public int speed = 2;
+
+    public int state = 0;
+
+    public boolean attacking = false;
+    public boolean knockBacking = false;
+
+    public double knockBackdx = 0;
+    public double knockBackdy = 0;
+    public int knockBackSpeed = 0;
+    public int knockBackTimer = 0;
 
     public Enemy() {
         this.x = 100;
@@ -33,6 +40,24 @@ public class Enemy{
     }
 
     public void move(double playerX, double playerY) {
+        switch(state) {
+            case 0 -> stateIdle(playerX, playerY);
+            case 1 -> stateMove(playerX, playerY);
+            case 2 -> stateKnockBack();
+        }
+    }
+
+    public void stateIdle(double playerX, double playerY) {
+        double dx = playerX - getCenterX();
+        double dy = playerY - getCenterY();
+
+        double dxdy = Math.sqrt(dx * dx + dy * dy);
+        if (dxdy <= 100) {
+            state = 1;
+        }
+    }
+
+    public void stateMove(double playerX, double playerY) {
         double dx = playerX - getCenterX();
         double dy = playerY - getCenterY();
 
@@ -40,15 +65,20 @@ public class Enemy{
         if (dxdy != 0) {
             dx /= dxdy;
             dy /= dxdy;
-            if (knockBackTimer > 0){
-                x += dx * knockBackSpeed;
-                y += dy * knockBackSpeed;
-                knockBackTimer -= 1;
-            }
-            else {
-                x += dx * speed;
-                y += dy * speed;
-            }
+            x += dx * speed;
+            y += dy * speed;
+        }
+    }
+
+    public void stateKnockBack() {
+        if (knockBackTimer > 0){
+            x -= knockBackdx * knockBackSpeed;
+            y -= knockBackdy * knockBackSpeed;
+            knockBackTimer -= 1;
+        }
+        else {
+            state = 1;
+            knockBacking = false;
         }
     }
 
@@ -64,6 +94,8 @@ public class Enemy{
         knockBackdy /= dxdy;
         knockBackSpeed = s;
         knockBackTimer = t;
+        state = 2;
+        knockBacking = true;
     }
 
     public void draw(Graphics g) {

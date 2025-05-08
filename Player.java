@@ -4,14 +4,17 @@ public class Player{
     private double x, y;
     private int width, height;
     private Color color;
+
     private int speed = 5;
     private int maxHealth = 0;
     private int currentHealth = 0;
     private int maxEnergy = 0;
     private double currentEnergy = 0;
+
+    private boolean invincible = false;
     private boolean attacking = false;
     private int attackCoolDown = 0;
-    private boolean invincible = false;
+    
     private boolean dodging = false;
     private int dodgeTimer = 0;
     private int dodgeCoolDown = 0;

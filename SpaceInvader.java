@@ -1,32 +1,52 @@
-import java.awt.CardLayout;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.awt.Dimension;
+import javax.swing.*;
 
 public class SpaceInvader {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Space Invaders");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        CardLayout cardLayout = new CardLayout();
-        JPanel cardPanel = new JPanel(cardLayout); 
-
-        SpaceInvaderPanel gamepanel = new SpaceInvaderPanel(cardLayout,cardPanel);
-        StartPanel startpanel = new StartPanel(cardLayout,cardPanel,gamepanel);
-        SettingsPanel settingpanel = new SettingsPanel(cardLayout,cardPanel,gamepanel);
-
-        cardPanel.add(gamepanel, "game");
-        cardPanel.add(startpanel, "start");
-        cardPanel.add(settingpanel, "setting");
-
-        frame.add(cardPanel);
-        frame.pack();
         frame.setResizable(false);
-        frame.setVisible(true);
-        
-        cardLayout.show(cardPanel,"start");
-        gamepanel.pauseGame();
 
+        // 播放背景音樂
         MusicPlayer musicPlayer = new MusicPlayer();
-        musicPlayer.playMusic("music/music1.wav", -10.0f);
+        musicPlayer.playMusic("music/StartMenu.wav", Constants.currentVolume);
+
+        // 建立 layeredPane
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT));
+        frame.setContentPane(layeredPane);
+
+        // 建立遊戲面板
+        SpaceInvaderPanel gamePanel = new SpaceInvaderPanel(layeredPane);
+        gamePanel.setBounds(0, 0, Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT);
+
+        // 先建立 StartPanel
+        StartPanel startPanel = new StartPanel(gamePanel, musicPlayer);
+        startPanel.setBounds(0, 0, Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT);
+
+        // 建立 SettingsPanel 並將 startPanel 傳入
+        SettingsPanel settingsPanel = new SettingsPanel(gamePanel, startPanel, layeredPane, musicPlayer);
+        settingsPanel.setBounds(0, 0, Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT);
+
+        // 設定 StartPanel 中的 startPanel 引用
+        gamePanel.setSettingsPanel(settingsPanel);
+        startPanel.setSettingsPanel(settingsPanel);  // 傳遞 settingsPanel 給 startPanel
+
+        // 加入面板至 layeredPane
+        layeredPane.add(gamePanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.add(startPanel, JLayeredPane.MODAL_LAYER);      // 第2層
+        layeredPane.add(settingsPanel, JLayeredPane.POPUP_LAYER);   // 第3層（最上層）
+
+        // 預設顯示開始畫面，暫停遊戲
+        gamePanel.pauseGame();
+        startPanel.setVisible(true);
+        settingsPanel.setVisible(false);
+
+        frame.pack();
+        frame.setLocationRelativeTo(null); // 視窗置中
+        frame.setVisible(true);
+
+        startPanel.setMusicPlayer(musicPlayer);
+        settingsPanel.setMusicPlayer(musicPlayer);
     }
 }

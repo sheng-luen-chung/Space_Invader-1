@@ -32,16 +32,18 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
-    public SpaceInvaderPanel(CardLayout cl, JPanel cp) {
+    private JLayeredPane layeredPane;
+    private JPanel settingsPanel;
+
+    public SpaceInvaderPanel(JLayeredPane lp) {
         setPreferredSize(new Dimension(Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT));
         setBackground(Color.BLACK);
         setFocusable(true);
         addKeyListener(this);
         addMouseListener(this);
         addMouseMotionListener(this);
-        // requestFocusInWindow();
-        cardPanel = cp;
-        cardLayout = cl;
+        this.layeredPane = lp;
+        setPreferredSize(new Dimension(Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT));
 
         timer = new Timer(15, this);
         timer.start();
@@ -112,7 +114,12 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             if(escPressed) {
                 pauseGame();
                 escPressed = false;
-                cardLayout.show(cardPanel,"setting");
+                settingsPanel.setOpaque(false);
+                for (Component comp : layeredPane.getComponents()) {
+                    if (comp instanceof SettingsPanel) {
+                        comp.setVisible(true);
+                    }
+                }
             }
                 
             checkCollisions();
@@ -139,10 +146,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                     explodes.add(new Explode(collisionX, collisionY, b.getWidth(), b.getHeight(), Color.RED, 100));
 
                     bullet.remove();
-                    // e.getHurt(b.getDamage());
-                    // if (e.getHealth() <= 0) {
-                    //     enemy.remove();
-                    // }
                     break;
                 }
             }
@@ -286,4 +289,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
     @Override
     public void mouseDragged(MouseEvent e) {}
+
+    public void setSettingsPanel(SettingsPanel settingPanel) {
+        this.settingsPanel = settingPanel;
+    }
 }
