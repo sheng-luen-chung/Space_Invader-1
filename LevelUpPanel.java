@@ -347,6 +347,8 @@ public class LevelUpPanel extends JPanel {
         gamePanel.resumeGame();
         gamePanel.player.restoreHealth();
         gamePanel.player.restoreEnergy();
+        gamePanel.timer1.start();
+        gamePanel.timer2.start();
     }
     
     private void updateLevelInfo() {

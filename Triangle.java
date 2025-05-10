@@ -38,6 +38,12 @@ public class Triangle extends Enemy{
             case 2 -> stateKnockBack();
             case 3 -> stateAttack(playerX, playerY);
         }
+        if (getHurtTimer > 0) {
+            getHurtTimer -= 1;
+        }
+        else {
+            getHurting = false;
+        }
     }
 
     @Override
@@ -71,12 +77,6 @@ public class Triangle extends Enemy{
             state = 3;
         }
         rotateTri();
-        if (getHurtTimer > 0) {
-            getHurtTimer -= 1;
-        }
-        else {
-            getHurting = false;
-        }
     }
 
     @Override
@@ -218,7 +218,7 @@ public class Triangle extends Enemy{
 
     @Override
     public Rectangle getBounds() {
-        return new Rectangle((int) centerX, (int) centerY, width, height);
+        return new Rectangle((int) (centerX - width / 2), (int) (centerY - height / 2), width, height);
     }
 
 }

@@ -17,17 +17,19 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     
     private boolean paused = false;
     private boolean playerInput = false;
-    private boolean playerAttack = false;
     private boolean enemyMove = false;
     private boolean isGameOver = false;
     private boolean showBonfireText = false;
     private boolean inBonfire = false;
+
+    private boolean changeMusic = false;
 
     private boolean wPressed = false;
     private boolean aPressed = false;
     private boolean sPressed = false;
     private boolean dPressed = false;
     private boolean ePressed = false;
+    private boolean rPressed = false;
     private boolean escPressed = false;
     private int spacePressed = 0;
 
@@ -63,15 +65,21 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         timer2 = new Timer(5000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enemies.add(new BigTriangle(100, 100, 60, (int) (60 * 1.732 / 2), Color.red, 100, enemies));
-                musicPlayer.playSegment("BigTriangle", 0, 245, true);
+                enemies.add(new BigTriangle(640, 40, 60, (int) (60 * 1.732 / 2), Color.red, 1000, enemies));
+                musicPlayer.stopById("BigTriangle");
+                musicPlayer.playSegment("BigTriangle", 0, 105, true);
                 timer2.stop();
             }
         });
-        timer3 = new Timer(500, new ActionListener() {
+        timer3 = new Timer(100, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 musicPlayer.adjustVolume(-1);
+                if (musicPlayer.getCurrentVolume() < 1){
+                    musicPlayer.stopAll();
+                    timer3.stop();
+                    musicPlayer.setVolume(10);
+                }
             }
         });
         // timer1.start();
@@ -94,7 +102,13 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         campFire.draw(g);
         if (showBonfireText) campFire.drawText(g);
         player.draw(g);
-        PlayerUI.draw(g, (int) Constants.playerActualHP, player.getHealth(), (int) Constants.playerActualEnergy, player.getEnergy(), player.getExp());
+        PlayerUI.draw(g, 
+                      (int) Constants.playerActualHP, 
+                      player.getHealth(), 
+                      (int) Constants.playerActualEnergy, 
+                      player.getEnergy(), 
+                      player.getExp(), 
+                      player.getEstus());
         for(Enemy enemy : enemies) {
             enemy.draw(g);
         }
@@ -124,6 +138,11 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             for (Enemy enemy : enemies) {
                 if (enemy instanceof BigTriangle bt) {
                     enemiesToAdd.addAll(bt.enemiesToAdd);
+                    if (bt.getPhase() == 1 && !changeMusic) {
+                        musicPlayer.stopById("BigTriangle");
+                        musicPlayer.playSegment("BigTriangle", 105, 245, true);
+                        changeMusic = true;
+                    }
                     bt.enemiesToAdd.clear();
                 }
             }
@@ -161,6 +180,10 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 spacePressed = 0;
             }
 
+            if(rPressed) {
+                player.increaseHealth(0.5);
+            }
+
             if(escPressed) {
                 pauseGame();
                 escPressed = false;
@@ -187,17 +210,23 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                     pauseGame();
                     showBonfireText = false;
                     inBonfire = true;
+                    changeMusic = false;
                     levelUpPanel.setOpaque(false);
                     levelUpPanel.setVisible(true);
                     musicPlayer.stopAll();
                     musicPlayer.playSegment("Bonfire", 0f, 4f, false);
 
                     player.restoreHealth();
+                    player.restoreEnergy();
+                    player.restoreEstus();
 
                     enemies.clear();
                     bullets.clear();
                     coins.clear();
                     spawnEnemies();
+
+                    timer1.stop();
+                    timer2.stop();
                 }
             }
             else {
@@ -260,14 +289,10 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                             int offsetY = (int)(Math.random() * 100 - 50);
                             coins.add(new Coin(e.getCenterX() + offsetX, e.getCenterY() + offsetY, 5));
                         }
-                        enemy.remove();
-                        if (enemies.isEmpty()) {
-                            if (musicPlayer.getCurrentVolume() < 1){
-                                musicPlayer.stopAll();
-                                timer3.stop();
-                            }
+                        if (e instanceof BigTriangle) {
                             timer3.start();
                         }
+                        enemy.remove();
                         musicPlayer.playSegment("Kill", 0.0f, 1f, false);
                     }
                 }
@@ -283,7 +308,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 if (pRect.intersects(eRect)) {
                     if (!player.isKnockBacking() && !player.isInvincible()){
                         player.getHurt(e.getDamage());
-                        player.knockBack(e.getCenterX(), e.getCenterY(), 2, 5);
+                        player.knockBack(e.getCenterX(), e.getCenterY(), 10, 30);
                         if (player.getHealth() <= 0 && !isGameOver) {
                             disablePlayerInput();
                             isGameOver = true;
@@ -338,7 +363,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                             (int) Constants.playerActualHP, 
                             (int) Constants.playerActualEnergy);
         
-        campFire = new CampFire(500, 500);
+        campFire = new CampFire(640, 600);
     
         enemies.clear();
         bullets.clear();
@@ -364,7 +389,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
         paused = false;
         playerInput = true;
-        playerAttack = true;
         enemyMove = true;
         isGameOver = false;
 
@@ -402,6 +426,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 case KeyEvent.VK_S -> sPressed = true;
                 case KeyEvent.VK_D -> dPressed = true;
                 case KeyEvent.VK_E -> ePressed = true;
+                case KeyEvent.VK_R -> rPressed = true;
                 case KeyEvent.VK_SPACE -> spacePressed = 1;
                 case KeyEvent.VK_ESCAPE -> escPressed = true;
             }
@@ -417,6 +442,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 case KeyEvent.VK_S -> sPressed = false;
                 case KeyEvent.VK_D -> dPressed = false;
                 case KeyEvent.VK_E -> ePressed = false;
+                case KeyEvent.VK_R -> rPressed = false;
                 case KeyEvent.VK_SPACE -> {
                     if(spacePressed == 1) spacePressed = 2;
                 }

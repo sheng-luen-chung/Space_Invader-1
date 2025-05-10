@@ -9,6 +9,7 @@ public class BigTriangle extends Triangle{
     private int attackType = 0;
     private int attackTypeCounter = 0;
     private double rotationRadius = 0;
+    private int rotateDirection = -1;
 
     private boolean isSummoned = false;
 
@@ -20,6 +21,7 @@ public class BigTriangle extends Triangle{
         super(x, y, w, h, c, health);
         this.enemies = enemies;
         this.enemiesToAdd = new ArrayList<>();
+        this.attackDamage = 25;
     }
 
     @Override
@@ -30,6 +32,61 @@ public class BigTriangle extends Triangle{
             case 2 -> stateKnockBack();
             case 3 -> stateAttack(playerX, playerY);
         }
+        if (getHurtTimer > 0) {
+            getHurtTimer -= 1;
+        }
+        else {
+            getHurting = false;
+        }
+    }
+    
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(color);
+        g.drawPolygon(xPoints, yPoints, 3);
+        double healthPercant = (double) currentHealth / maxHealth;
+        int[] _xPoints = {
+            (int) (centerX + (xPoints[0] - centerX) * healthPercant),
+            (int) (centerX + (xPoints[1] - centerX) * healthPercant),
+            (int) (centerX + (xPoints[2] - centerX) * healthPercant)
+        };
+        int[] _yPoints = {
+            (int) (centerY + (yPoints[0] - centerY) * healthPercant),
+            (int) (centerY + (yPoints[1] - centerY) * healthPercant),
+            (int) (centerY + (yPoints[2] - centerY) * healthPercant)
+        };
+        g.fillPolygon(_xPoints, _yPoints, 3);
+
+        // 2. 設定血條寬度與位置
+        int barWidth = 640;
+        int barHeight = 15;
+        int barX = (Constants.FRAMEWIDTH - barWidth) / 2;
+        int barY = Constants.FRAMEHEIGHT - 80;
+
+        // 3. 計算當前血量比例
+        double hpRatio = (double) currentHealth / maxHealth;
+        int hpWidth = (int)(barWidth * hpRatio);
+
+        // 4. 背景條
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(barX, barY, barWidth, barHeight);
+
+        // 5. 血量條
+        g.setColor(Color.RED);
+        g.fillRect(barX, barY, hpWidth, barHeight);
+
+        // 6. 邊框
+        g.setColor(Color.BLACK);
+        g.drawRect(barX, barY, barWidth, barHeight);
+
+        // 7. 名稱（置中顯示）
+        String name = "Big Triangle";
+        g.setFont(new Font("Arial", Font.BOLD, 18));
+        FontMetrics fm = g.getFontMetrics();
+        int nameX = Constants.FRAMEWIDTH / 2 - fm.stringWidth(name) / 2;
+        int nameY = barY - 10;
+        g.setColor(Color.WHITE);
+        g.drawString(name, nameX, nameY);
     }
 
     @Override
@@ -60,16 +117,29 @@ public class BigTriangle extends Triangle{
                 dy /= distance;
                 centerX += dx * speed;
                 centerY += dy * speed;
+                if (phase == 1) {
+                    centerX += dx * speed;
+                    centerY += dy * speed;
+                }
             }
-            if (distance <= 200) {
+            if (distance <= 250) {
                 state = 3;
                 if (phase == 0) {
                     attackType = 0;
                     attackTypeCounter = 1;
                 }
                 else {
-                    attackType = (int) (Math.random() * 2);
-                    attackTypeCounter = 2 + (int) (Math.random() * 2);
+                    double rand = Math.random();
+                    if (rand < 0.4) {
+                        attackType = 0;
+                    }
+                    else if (rand < 0.6) {
+                        attackType = 1;
+                    }
+                    else {
+                        attackType = 2;
+                    }
+                    attackTypeCounter = 1 + (int) (Math.random() * 3);
                 }
             }
         }
@@ -83,8 +153,8 @@ public class BigTriangle extends Triangle{
                     centerY += dy * speed * radialDir;
                 }
 
-                double tangentX = -dy;
-                double tangentY = dx;
+                double tangentX = -dy * rotateDirection;
+                double tangentY = dx * rotateDirection;
                 double norm = Math.sqrt(tangentX * tangentX + tangentY * tangentY);
                 if (norm != 0) {
                     tangentX /= norm;
@@ -105,29 +175,35 @@ public class BigTriangle extends Triangle{
 
         if (phase == 0 && currentHealth < (double) maxHealth / 2) {
             phase = 1;
+            attackType = 2;
+            attackTypeCounter = 4;
+            state = 3;
         }
 
         rotateTri();
-
-        if (getHurtTimer > 0) {
-            getHurtTimer -= 1;
-        }
-        else {
-            getHurting = false;
-        }
     }
 
     @Override
     public void stateAttack(double playerX, double playerY) {
         if (!attacking) {
             attackSpeed = 20;
-            if (phase == 1 && attackType == 0) {
-                attackStartTime = 2 * Constants.TRIANGLEATTACKSTARTTIME;
-                attackCoolDown = (int) (1.5 * Constants.TRIANGLEATTACKCOOLDOWN);
+            if (attackType == 0) {
+                if (phase == 0) {
+                    attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
+                    attackCoolDown = Constants.TRIANGLEATTACKCOOLDOWN;
+                }
+                else {
+                    attackStartTime = (int) (1.5 * Constants.TRIANGLEATTACKSTARTTIME);
+                    attackCoolDown = (int) (1.25 * Constants.TRIANGLEATTACKCOOLDOWN);
+                }
             }
-            else {
+            else if (attackType == 1) {
                 attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
-                attackCoolDown = Constants.TRIANGLEATTACKCOOLDOWN;
+                attackCoolDown = (int) (0.5 * Constants.TRIANGLEATTACKCOOLDOWN);
+            }
+            else if (attackType == 2) {
+                attackStartTime = 2 * Constants.TRIANGLEATTACKSTARTTIME;
+                attackCoolDown = (int) (1.25 * Constants.TRIANGLEATTACKCOOLDOWN);
             }
             attackEndTime = Constants.TRIANGLEATTACKENDTIME;
             attacking = true;
@@ -139,8 +215,11 @@ public class BigTriangle extends Triangle{
             }
             else if (attackType == 1) {
                 if (!isSummoned){
-                    summonTriangleMinions(1 + (int) (Math.random() * 3));
+                    summonTriangleMinions(2 + (int) (Math.random() * 3));
                 }
+            }
+            else if (attackType == 2) {
+                sprintsprintAttack(playerX, playerY);
             }
 
             if (attackCoolDown > 0) {
@@ -155,6 +234,7 @@ public class BigTriangle extends Triangle{
                     moveType = 1;
                 }
                 attacking = false;
+                rotateDirection *= -1;
             }
         }
         rotateTri();
@@ -163,6 +243,7 @@ public class BigTriangle extends Triangle{
     @Override
     public void getHurt(int damage) {
         if (!getHurting && !knockBacking){
+            color = oriColor;
             currentHealth -= damage + (int) (Constants.playerActualSTR * 10);
             getHurting = true;
             getHurtTimer = 5;
@@ -172,6 +253,11 @@ public class BigTriangle extends Triangle{
         moveTypeTimer = 100;
     }
     
+    @Override
+    public int getDamage() {
+        return (int) (attackDamage - 5 + Math.random() * 10);
+    }
+
     @Override
     public void stateKnockBack() {
         if (knockBackTimer > 0){
@@ -248,6 +334,58 @@ public class BigTriangle extends Triangle{
             }
             else {
                 damagePlayer = false;
+                if (phase == 1 && !isSummoned) summonTriangleMinions((int) (1 + Math.random() * 2));
+            }
+        }
+    }
+
+    private void sprintsprintAttack(double playerX, double playerY) {
+        if (attackStartTime > 0) {
+            centerX = getCenterX();
+            centerY = getCenterY();
+            attackdx = playerX - centerX;
+            attackdy = playerY - centerY;
+            double dxdy = Math.sqrt(attackdx * attackdx + attackdy * attackdy);
+            attackdx /= dxdy;
+            attackdy /= dxdy;
+            centerX -= rotateDirection * attackdy * attackSpeed / 3;
+            centerY += rotateDirection * attackdx * attackSpeed / 3;
+            if (phase == 0) {
+                if (attackStartTime % 10 >= 5) {
+                    color = Color.WHITE;
+                }
+                else {
+                    color = oriColor;
+                }
+            }
+            else {
+                if (attackStartTime < (double) Constants.TRIANGLEATTACKSTARTTIME / 6){
+                    color = Color.WHITE;
+                }
+                else if (attackStartTime >= (double) Constants.TRIANGLEATTACKSTARTTIME / 6 && 
+                    attackStartTime < (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 4) {
+                    color = Color.BLACK;
+                }
+                else if (attackStartTime >= (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 4 && 
+                    attackStartTime < (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 5) {
+                    color = Color.WHITE;
+                }
+                else {
+                    color = oriColor;
+                }
+            }
+            attackStartTime -= 1;
+        }
+        else {
+            if (attackEndTime > 0) {
+                color = oriColor;
+                centerX += attackdx * attackSpeed * 1.5;
+                centerY += attackdy * attackSpeed * 1.5;
+                attackEndTime -= 1;
+                damagePlayer = true;
+            }
+            else {
+                damagePlayer = false;
             }
         }
     }
@@ -271,5 +409,9 @@ public class BigTriangle extends Triangle{
                 isSummoned = true;
             }
         }
+    }
+
+    public int getPhase() {
+        return phase;
     }
 }

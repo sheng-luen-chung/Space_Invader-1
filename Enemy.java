@@ -20,7 +20,7 @@ public class Enemy{
     public int getHurtCounter = 0;
     public int getHurtTimer = 0;
 
-    public int attackDamage = 10;
+    public int attackDamage = 20;
 
     public double knockBackdx = 0;
     public double knockBackdy = 0;

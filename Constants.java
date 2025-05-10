@@ -6,6 +6,7 @@ public class Constants {
     public static final int PLAYERHEIGHT = 40;
 
     public static final int PLAYERMAXLEVEL = 100;
+    public static final int PLAYERESTUSNUM = 5;
 
     private static final int PLAYERBASEHP = 100;
     public static int playerHPLevel = 10;

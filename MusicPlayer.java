@@ -106,6 +106,15 @@ public class MusicPlayer {
         }
     }
 
+    public void setVolume(float v) {
+        currentVolume = Math.max(0.0f, Math.min(10.0f, v));
+        for (List<Clip> clips : clipPool.values()) {
+            for (Clip clip : clips) {
+                applyVolume(clip);
+            }
+        }
+    }
+
     public float getCurrentVolume() {
         return currentVolume;
     }

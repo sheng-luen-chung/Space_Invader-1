@@ -14,8 +14,8 @@ public class Coin {
         this.x = x;
         this.y = y;
         this.exp = exp;
-        this.dx = Math.random() / 3;
-        this.dy = Math.random() / 3;
+        this.dx = (Math.random() - 0.5) / 1.5;
+        this.dy = (Math.random() - 0.5) / 1.5;
     }
 
     void move() {

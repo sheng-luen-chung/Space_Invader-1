@@ -8,11 +8,16 @@ public class Player{
     private int speed = 5;
     private int currentHealth = 0;
     private double currentEnergy = 0;
-    private int exp = 100;
+    private int exp = 0;
+    private int estus = 0;
 
     private boolean invincible = false;
     private boolean attacking = false;
+    private boolean healing = false;
     private int attackCoolDown = 0;
+
+    private int healingTimer = 0;
+    private int healingCoolDown = 0;
 
     private boolean dodging = false;
     private int dodgeTimer = 0;
@@ -26,6 +31,7 @@ public class Player{
     public double knockBackdy = 0;
     public int knockBackSpeed = 0;
     public int knockBackTimer = 0;
+    public int knockBackCoolDown = 0;
 
     Player(int x, int y, int w, int h, Color c, int health, int energy) {
         this.x = x;
@@ -35,11 +41,13 @@ public class Player{
         this.color = c;
         this.currentHealth = health;
         this.currentEnergy = energy;
+        this.exp = 0;
+        this.estus = Constants.PLAYERESTUSNUM;
     }
 
     void move(boolean wPressed, boolean aPressed, boolean sPressed, boolean dPressed) {
         if (!knockBacking) {
-            if (!dodging) {
+            if (!dodging && !attacking && !healing) {
                 double dx = 0;
                 double dy = 0;
 
@@ -69,10 +77,13 @@ public class Player{
             }
         }
         else {
-            if (knockBackTimer > 0){
-                x += knockBackdx * knockBackSpeed;
-                y += knockBackdy * knockBackSpeed;
-                knockBackTimer -= 1;
+            if (knockBackCoolDown > 0) {
+                if (knockBackTimer > 0){
+                    x += knockBackdx * knockBackSpeed;
+                    y += knockBackdy * knockBackSpeed;
+                    knockBackTimer -= 1;
+                }
+                knockBackCoolDown -= 1;
             }
             else {
                 knockBacking = false;
@@ -94,20 +105,33 @@ public class Player{
 
         if (attackCoolDown > 0) {
             attackCoolDown -= 1;
-            if (attackCoolDown == 0) {
-                attacking = false;
-            }
         }
+        else {
+            attacking = false;
+        }
+
         if (dodgeCoolDown > 0) {
             dodgeCoolDown -= 1;
         }
+
+        if (healingCoolDown > 0){
+            if (healingTimer > 0) {
+                currentHealth = Math.min(currentHealth + 1, (int) Constants.playerActualHP);
+                healingTimer -= 1;
+            }
+            healingCoolDown -= 1;
+        }
+        else {
+            healing = false;
+        }
+
         if (!attacking && !dodging && currentEnergy < Constants.playerActualEnergy) {
             currentEnergy += 0.5 * Constants.playerActualDEX;
         }
     }
 
     void dodge(boolean wPressed, boolean aPressed, boolean sPressed, boolean dPressed) {
-        if (!attacking && !dodging && !knockBacking && currentEnergy > 0){
+        if (!attacking && !dodging && !knockBacking && !healing && currentEnergy > 0){
             dodging = true;
             dodgeTimer = 10;
             dodgeCoolDown = 50;
@@ -139,12 +163,13 @@ public class Player{
         knockBackdx /= dxdy;
         knockBackdy /= dxdy;
         knockBackSpeed = s;
-        knockBackTimer = t;
+        knockBackTimer = t / 2;
+        knockBackCoolDown = t;
         knockBacking = true;
     }
 
     void attack() {
-        if (!attacking && !dodging && !knockBacking && currentEnergy > 0) {
+        if (!attacking && !dodging && !knockBacking && !healing && currentEnergy > 0) {
             attacking = true;
             attackCoolDown = 30;
             currentEnergy -= 20;
@@ -197,12 +222,31 @@ public class Player{
         return currentHealth;
     }
 
+    void increaseHealth(double h) {
+        if (estus > 0) {
+            if (!attacking && !dodging && !knockBacking && !healing) {
+                estus -= 1;
+                healing = true;
+                healingTimer = 30;
+                healingCoolDown = 50;
+            }
+        }
+    }
+
     void restoreHealth() {
         currentHealth = (int) Constants.playerActualHP;
     }
 
     void restoreEnergy() {
         currentEnergy = (int) Constants.playerActualEnergy;
+    }
+
+    int getEstus() {
+        return estus;
+    }
+
+    void restoreEstus() {
+        estus = Constants.PLAYERESTUSNUM;
     }
 
     void increaseExp(int exp) {

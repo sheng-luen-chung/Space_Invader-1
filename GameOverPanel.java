@@ -49,6 +49,8 @@ public class GameOverPanel extends JPanel {
             GameOverPanel.this.setVisible(false);
             restartTimer.stop();
             musicPlayer.stopAll();
+            gamePanel.timer1.start();
+            gamePanel.timer2.start();
         });
         restartTimer.start();
     }
