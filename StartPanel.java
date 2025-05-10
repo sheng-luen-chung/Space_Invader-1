@@ -40,7 +40,7 @@ public class StartPanel extends JPanel {
             gamePanel.resumeGame();  // 繼續遊戲
             settingsPanel.setBlackBackground(false);
             settingsPanel.showResumeButton(true);
-            musicPlayer.stopMusic();
+            musicPlayer.stopById("StartMenu");
         });
 
         // 當點擊設定按鈕時，隱藏當前畫面並顯示設定面板

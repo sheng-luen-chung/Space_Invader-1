@@ -1,12 +1,20 @@
 import java.awt.*;
 
 public class Triangle extends Enemy{
-    private double centerX = 0;
-    private double centerY = 0;
-    private double dx = 0;
-    private double dy = 0;
-    private int[] xPoints = new int[3];
-    private int[] yPoints = new int[3];
+    public double centerX = 0;
+    public double centerY = 0;
+    public double dx = 0;
+    public double dy = 0;
+    public int[] xPoints = new int[3];
+    public int[] yPoints = new int[3];
+    
+    public double attackdx = 0;
+    public double attackdy = 0;
+    public int attackSpeed = 0;
+    public int attackTimer = 0;
+    public int attackStartTime = 0;
+    public int attackEndTime = 0;
+    public int attackCoolDown = 0;
 
     Triangle(int x, int y, int w, int h, Color c, int health) {
         super(x, y, w, h, c, health);
@@ -28,7 +36,7 @@ public class Triangle extends Enemy{
             case 0 -> stateIdle(playerX, playerY);
             case 1 -> stateMove(playerX, playerY);
             case 2 -> stateKnockBack();
-            case 3 -> stateAttack();
+            case 3 -> stateAttack(playerX, playerY);
         }
     }
 
@@ -40,7 +48,7 @@ public class Triangle extends Enemy{
         dy = playerY - centerY;
 
         double dxdy = Math.sqrt(dx * dx + dy * dy);
-        if (dxdy <= 100) {
+        if (dxdy <= 400) {
             state = 1;
         }
     }
@@ -59,11 +67,21 @@ public class Triangle extends Enemy{
             centerX += dx * speed;
             centerY += dy * speed;
         }
+        if (dxdy <= 100) {
+            state = 3;
+        }
         rotateTri();
+        if (getHurtTimer > 0) {
+            getHurtTimer -= 1;
+        }
+        else {
+            getHurting = false;
+        }
     }
 
     @Override
     public void stateKnockBack() {
+        color = oriColor;
         if (knockBackTimer > 0){
             centerX += knockBackdx * knockBackSpeed;
             centerY += knockBackdy * knockBackSpeed;
@@ -76,18 +94,66 @@ public class Triangle extends Enemy{
         rotateTri();
     }
 
-    public void stateAttack() {
-        
+    public void stateAttack(double playerX, double playerY) {
+        if (!attacking) {
+            centerX = getCenterX();
+            centerY = getCenterY();
+            attackdx = playerX - centerX;
+            attackdy = playerY - centerY;
+            double dxdy = Math.sqrt(attackdx * attackdx + attackdy * attackdy);
+            attackdx /= dxdy;
+            attackdy /= dxdy;
+            attackSpeed = 10;
+            attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
+            attackEndTime = Constants.TRIANGLEATTACKENDTIME;
+            attackCoolDown = Constants.TRIANGLEATTACKCOOLDOWN;
+            attacking = true;
+        }
+        else {
+            if (attackStartTime > 0) {
+                if (attackStartTime % 10 >= 5) {
+                    color = Color.WHITE;
+                }
+                else {
+                    color = oriColor;
+                }
+                attackStartTime -= 1;
+            }
+            else {
+                if (attackEndTime > 0) {
+                    color = oriColor;
+                    centerX += attackdx * attackSpeed;
+                    centerY += attackdy * attackSpeed;
+                    attackEndTime -= 1;
+                    damagePlayer = true;
+                }
+                else {
+                    damagePlayer = false;
+                }
+            }
+            if (attackCoolDown > 0) {
+                attackCoolDown -= 1;
+            }
+            else {
+                state = 1;
+                attacking = false;
+            }
+        }
+        rotateTri();
     }
 
-    private void rotateTri() {
+    public void rotateTri() {
         double angle;
         double radius = height * 2.0 / 3;
 
         if (knockBacking){
-            angle = Math.atan2(knockBackdy, knockBackdx);
+            // angle = Math.atan2(knockBackdy, knockBackdx);
+            angle = Math.atan2(dy, dx);
         }
-        else{
+        else if (attacking) {
+            angle = Math.atan2(attackdy, attackdx);
+        }
+        else {
             angle = Math.atan2(dy, dx);
         }
 
@@ -143,7 +209,16 @@ public class Triangle extends Enemy{
     }
 
     @Override
+    public boolean isAttacking() {
+        if (attackStartTime <= 0 && attackEndTime > 0) {
+            return attacking;
+        }
+        else return false;
+    }
+
+    @Override
     public Rectangle getBounds() {
         return new Rectangle((int) centerX, (int) centerY, width, height);
     }
+
 }

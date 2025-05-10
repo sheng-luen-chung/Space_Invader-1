@@ -3,6 +3,7 @@ import java.awt.*;
 public class Enemy{
     public double x, y;
     public int width, height;
+    public Color oriColor;
     public Color color;
     
     public int maxHealth = 0;
@@ -13,17 +14,26 @@ public class Enemy{
 
     public boolean attacking = false;
     public boolean knockBacking = false;
+    public boolean damagePlayer = false;
+    public boolean getHurting = false;
+
+    public int getHurtCounter = 0;
+    public int getHurtTimer = 0;
+
+    public int attackDamage = 10;
 
     public double knockBackdx = 0;
     public double knockBackdy = 0;
     public int knockBackSpeed = 0;
     public int knockBackTimer = 0;
 
+
     public Enemy() {
         this.x = 100;
         this.y = 100;
         this.width = 40;
         this.height = 40;
+        this.oriColor = Color.RED;
         this.color = Color.RED;
         this.maxHealth = 100;
         this.currentHealth = 100;
@@ -34,6 +44,7 @@ public class Enemy{
         this.y = y;
         this.width = w;
         this.height = h;
+        this.oriColor = c;
         this.color = c;
         this.maxHealth = health;
         this.currentHealth = health;
@@ -68,6 +79,12 @@ public class Enemy{
             x += dx * speed;
             y += dy * speed;
         }
+        if (getHurtTimer > 0) {
+            getHurtTimer -= 1;
+        }
+        else {
+            getHurting = false;
+        }
     }
 
     public void stateKnockBack() {
@@ -83,19 +100,27 @@ public class Enemy{
     }
 
     public void getHurt(int damage) {
-        currentHealth -= damage;
+        if (!getHurting && !knockBacking){
+            currentHealth -= damage + (int) (Constants.playerActualSTR * 10);
+            getHurting = true;
+            getHurtTimer = 5;
+            getHurtCounter += 1;
+        }
     }
 
     public void knockBack(double x, double y, int s, int t) {
-        knockBackdx = getCenterX() - x;
-        knockBackdy = getCenterY() - y;
-        double dxdy = Math.sqrt(knockBackdx * knockBackdx + knockBackdy * knockBackdy);
-        knockBackdx /= dxdy;
-        knockBackdy /= dxdy;
-        knockBackSpeed = s;
-        knockBackTimer = t;
-        state = 2;
-        knockBacking = true;
+        if (getHurtCounter >= 1) {
+            knockBackdx = getCenterX() - x;
+            knockBackdy = getCenterY() - y;
+            double dxdy = Math.sqrt(knockBackdx * knockBackdx + knockBackdy * knockBackdy);
+            knockBackdx /= dxdy;
+            knockBackdy /= dxdy;
+            knockBackSpeed = s;
+            knockBackTimer = t;
+            state = 2;
+            knockBacking = true;
+            getHurtCounter = 0;
+        }
     }
 
     public void draw(Graphics g) {
@@ -117,8 +142,20 @@ public class Enemy{
         return y + (double) height / 2; 
     }
 
+    public double getMaxHealth(){
+        return maxHealth;
+    }
+
     public double getHealth(){
         return currentHealth;
+    }
+
+    public int getDamage() {
+        return attackDamage;
+    }
+
+    public boolean isAttacking() {
+        return attacking;
     }
 
     public Rectangle getBounds() {

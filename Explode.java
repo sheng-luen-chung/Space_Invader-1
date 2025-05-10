@@ -6,7 +6,7 @@ public class Explode {
     private double width, height;
     private double w, h;
     private Color color;
-    private int damage = 20;
+    private int damage = 15;
     private int maxHealth = 0;
     private int currentHealth = 0;
 

@@ -36,7 +36,6 @@ public class SettingsPanel extends JPanel {
         resumeButton.addActionListener(e -> {
             this.setVisible(false);
             gamePanel.resumeGame();
-            musicPlayer.stopMusic();
         });
 
         backButton.addActionListener(e -> {
@@ -47,8 +46,7 @@ public class SettingsPanel extends JPanel {
             startPanel.revalidate();
             startPanel.repaint();
             layeredPane.moveToFront(startPanel);
-            musicPlayer.stopMusic();
-            musicPlayer.playMusic("music/StartMenu.wav", Constants.currentVolume);
+            musicPlayer.playSegment("StartMenu", 0f, 186f, true);
         });
 
         buttonPanel.add(resumeButton);

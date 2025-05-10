@@ -4,7 +4,7 @@ public class Bullet{
     private double x, y;
     private int width, height;
     private Color color;
-    private int speed = 5;
+    private int speed = 7;
     private int damage = 20;
     private double  dx = 0;
     private double dy = 0;
