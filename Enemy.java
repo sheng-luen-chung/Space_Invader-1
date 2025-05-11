@@ -41,13 +41,14 @@ public class Enemy{
         this.detectZone = 100;
     }
 
-    public Enemy(int x, int y, int w, int h, Color c, int health, int detectZone) {
+    public Enemy(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone) {
         this.x = x;
         this.y = y;
         this.width = w;
         this.height = h;
         this.oriColor = c;
         this.color = c;
+        this.attackDamage = attackDamage;
         this.maxHealth = health;
         this.currentHealth = health;
         this.detectZone = detectZone;

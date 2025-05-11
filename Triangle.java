@@ -16,8 +16,8 @@ public class Triangle extends Enemy{
     public int attackEndTime = 0;
     public int attackCoolDown = 0;
 
-    Triangle(int x, int y, int w, int h, Color c, int health, int detectZone) {
-        super(x, y, w, h, c, health, detectZone);
+    Triangle(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone) {
+        super(x, y, w, h, c, attackDamage, health, detectZone);
         this.xPoints = new int[] {
             (int) (x),
             (int) (x + (double) w / 2),

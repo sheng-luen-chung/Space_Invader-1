@@ -171,6 +171,7 @@ public class LevelUpPanel extends JPanel {
         valueLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
 
         tempLevelSetter.set(baseLevelGetter.get());
+        updateLevelInfo();
 
         decreaseButton.addActionListener(e -> {
             confirmLevelUp = false;

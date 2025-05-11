@@ -18,10 +18,9 @@ public class BigTriangle extends Triangle{
     List<Enemy> enemiesToAdd;
 
 
-    BigTriangle(int x, int y, int w, int h, Color c, int health, int detectZone) {
-        super(x, y, w, h, c, health, detectZone);
+    BigTriangle(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone) {
+        super(x, y, w, h, c, attackDamage, health, detectZone);
         this.enemiesToAdd = new ArrayList<>();
-        this.attackDamage = 25;
     }
 
     @Override
@@ -317,6 +316,11 @@ public class BigTriangle extends Triangle{
             centerX += knockBackdx * knockBackSpeed;
             centerY += knockBackdy * knockBackSpeed;
             knockBackTimer -= 1;
+
+            attackTimer = 0;
+            attackStartTime = 0;
+            attackEndTime = 0;
+            attackCoolDown = 0;
         }
         else {
             state = 1;
@@ -490,7 +494,9 @@ public class BigTriangle extends Triangle{
                                                (int)centerY + offsetY, 
                                                20, 
                                                (int) (20 * 1.732 / 2), 
-                                               Color.ORANGE, 1, 
+                                               Color.ORANGE, 
+                                               (int) (10 * Math.pow(1.25, Constants.nRuns + 1)), 
+                                               1, 
                                                Constants.SMALLTRIANGLEDETECTZONE);
                 enemiesToAdd.add(minion);
                 isSummoned = true;

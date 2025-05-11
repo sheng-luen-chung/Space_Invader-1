@@ -41,7 +41,7 @@ public class Player{
         this.color = c;
         this.currentHealth = health;
         this.currentEnergy = energy;
-        this.exp = 100;
+        this.exp = 0;
         this.estus = Constants.PLAYERESTUSNUM;
     }
 

@@ -39,7 +39,6 @@ public class SettingsPanel extends JPanel {
         });
 
         backButton.addActionListener(e -> {
-            gamePanel.restartGame();
             gamePanel.pauseGame();
             this.setVisible(false);
             startPanel.setVisible(true);
