@@ -5,8 +5,9 @@ public class Constants {
     public static final int PLAYERWIDTH = 40;
     public static final int PLAYERHEIGHT = 40;
 
-    public static final int PLAYERMAXLEVEL = 100;
+    public static final int PLAYERMAXLEVEL = 99;
     public static final int PLAYERESTUSNUM = 5;
+    public static final int PLAYERINITIALEXP = 0;
 
     private static final int PLAYERBASEHP = 100;
     public static int playerHPLevel = 10;
@@ -41,8 +42,8 @@ public class Constants {
     public static final int TRIANGLEDETECTZONE = 1000;
     public static final int BIGTRIANGLEDETECTZONE = 10000;
 
-    private static final double HPK = 0.2;
-    private static final double STRK = 0.1;
+    private static final double HPK = 0.12;
+    private static final double STRK = 0.15;
     private static final double DEXK = 0.1;
 
     public static double getActualHP() {
@@ -50,7 +51,7 @@ public class Constants {
         double k = HPK;
         for (int a = 0; a < playerHPLevel - 10; a++) {
             double extra = PLAYERBASEHP * k;
-            k -= 0.001;
+            if (a % 10 == 0) k /= 1.3;
             playerActualHP += extra;
         }
         return playerActualHP;

@@ -1,13 +1,12 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Iterator;
 import javax.swing.*;
 
-public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyListener, MouseListener, MouseMotionListener{
+public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyListener, MouseListener{
     Timer timer1, timer2, timer3, timer4;
     ArrayList<Enemy> enemies = new ArrayList<>();
     ArrayList<Bullet> bullets = new ArrayList<>();
@@ -49,12 +48,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     private int leftClickX = 0;
     private int leftClickY = 0;
 
-    private int mouseX = 0;
-    private int mouseY = 0;
-
-    private CardLayout cardLayout;
-    private JPanel cardPanel;
-
     private JLayeredPane layeredPane;
     private JPanel settingsPanel;
     private GameOverPanel gameOverPanel;
@@ -67,7 +60,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         setFocusable(true);
         addKeyListener(this);
         addMouseListener(this);
-        addMouseMotionListener(this);
         this.layeredPane = lp;
         setPreferredSize(new Dimension(Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT));
 
@@ -158,6 +150,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         }
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -470,9 +463,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         leftClickX = 0;
         leftClickY = 0;
 
-        mouseX = 0;
-        mouseY = 0;
-
         timer1.start();
         timer4.start();
     }
@@ -494,9 +484,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     
         leftClickX = 0;
         leftClickY = 0;
-
-        mouseX = 0;
-        mouseY = 0;
     }
 
     @Override
@@ -571,17 +558,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             }
         }
     }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {        
-        if (playerInput) {
-            mouseX = e.getX();
-            mouseY = e.getY();
-        }
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {}
 
     public void setSettingsPanel(SettingsPanel settingPanel) {
         this.settingsPanel = settingPanel;

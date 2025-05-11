@@ -41,7 +41,7 @@ public class Player{
         this.color = c;
         this.currentHealth = health;
         this.currentEnergy = energy;
-        this.exp = 0;
+        this.exp = Constants.PLAYERINITIALEXP;
         this.estus = Constants.PLAYERESTUSNUM;
     }
 
@@ -126,7 +126,7 @@ public class Player{
         }
 
         if (!attacking && !dodging && currentEnergy < Constants.playerActualEnergy) {
-            currentEnergy += 0.5 * Constants.playerActualDEX;
+            currentEnergy += 0.5 + 0.25 * Constants.playerActualDEX;
         }
     }
 
@@ -172,7 +172,7 @@ public class Player{
         if (!attacking && !dodging && !knockBacking && !healing && currentEnergy > 0) {
             attacking = true;
             attackCoolDown = 30;
-            currentEnergy -= 20;
+            currentEnergy -= 30;
         }
     }
 
