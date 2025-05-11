@@ -2,11 +2,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Iterator;
 import javax.swing.*;
 
 public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyListener, MouseListener, MouseMotionListener{
-    Timer timer1, timer2, timer3;
+    Timer timer1, timer2, timer3, timer4;
     ArrayList<Enemy> enemies = new ArrayList<>();
     ArrayList<Bullet> bullets = new ArrayList<>();
     List<Enemy> enemiesToAdd = new ArrayList<>();
@@ -22,6 +23,13 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     private boolean showBonfireText = false;
     private boolean inBonfire = false;
 
+    private final int spawnEnemiesMaxDelay = 10000;
+    private final int spawnEnemiesMinDelay = 9000;
+    private int spawnEnemiesDelay = 10000;
+    private int spawnEnemiesStep = 500;
+    private final int bigTriangleDelay = 10000;
+    private boolean stopSpawmEnemies = false;
+
     private boolean changeMusic = false;
 
     private boolean wPressed = false;
@@ -29,8 +37,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     private boolean sPressed = false;
     private boolean dPressed = false;
     private boolean ePressed = false;
-    private boolean rPressed = false;
     private boolean escPressed = false;
+    private int rPressed = 0;
     private int spacePressed = 0;
 
     private int mouseLeftClicked = 0;
@@ -62,38 +70,79 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         setPreferredSize(new Dimension(Constants.FRAMEWIDTH, Constants.FRAMEHEIGHT));
 
         timer1 = new Timer(15, this);
-        timer2 = new Timer(5000, new ActionListener() {
+        timer2 = new Timer(bigTriangleDelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enemies.add(new BigTriangle(640, 40, 60, (int) (60 * 1.732 / 2), Color.red, 1000, enemies));
+                enemies.add(new BigTriangle(640, 40, 60, (int) (60 * 1.732 / 2), Color.red, 100, Constants.BIGTRIANGLEDETECTZONE));
                 musicPlayer.stopById("BigTriangle");
                 musicPlayer.playSegment("BigTriangle", 0, 105, true);
                 timer2.stop();
             }
         });
-        timer3 = new Timer(100, new ActionListener() {
+        timer3 = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 musicPlayer.adjustVolume(-1);
                 if (musicPlayer.getCurrentVolume() < 1){
-                    musicPlayer.stopAll();
+                    musicPlayer.stopById("BigTriangle");
+                    musicPlayer.adjustVolume(10);
                     timer3.stop();
-                    musicPlayer.setVolume(10);
                 }
             }
         });
-        // timer1.start();
-        // timer2.start();
+        timer4 = new Timer(spawnEnemiesDelay, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                spawnEnemies();
+                if (spawnEnemiesDelay > spawnEnemiesMinDelay) {
+                    spawnEnemiesDelay -= spawnEnemiesStep;
+                    System.out.println(spawnEnemiesDelay);
+                }
+                if (spawnEnemiesDelay == spawnEnemiesMinDelay) {
+                    stopSpawmEnemies = true;
+                    timer4.stop();
+                    timer2.start();
+                    System.out.println("Big Triangle");
+                }
+            }
+        });
 
         restartGame();
     }
 
     void spawnEnemies() {
-        // for (int i = 0; i < Constants.FRAMEWIDTH; i+=120) {
-        //     for (int j = 0; j < 2; j++){
-        //         enemies.add(new Triangle(60 + i, 100 + j * 50, 30, (int) (30 * 1.732 / 2), Color.red, 100));
-        //     }
-        // }
+        Random rand = new Random();
+        int x = 0, y = 0;
+        int times = 11 - spawnEnemiesDelay / 1000 + rand.nextInt(3);
+
+        for (int a = 0; a < times; a++) {
+            int side = rand.nextInt(4); // 0 = top, 1 = bottom, 2 = left, 3 = right
+
+            switch (side) {
+                case 0: // Top
+                    x = rand.nextInt(Constants.FRAMEWIDTH);
+                    y = -Constants.TRIANGLEHEIGHT;
+                    break;
+                case 1: // Bottom
+                    x = rand.nextInt(Constants.FRAMEWIDTH);
+                    y = Constants.FRAMEHEIGHT;
+                    break;
+                case 2: // Left
+                    x = -Constants.TRIANGLEWIDTH;
+                    y = rand.nextInt(Constants.FRAMEHEIGHT);
+                    break;
+                case 3: // Right
+                    x = Constants.FRAMEWIDTH;
+                    y = rand.nextInt(Constants.FRAMEHEIGHT);
+                    break;
+            }
+            enemies.add(new Triangle(x, y, 
+                                        Constants.TRIANGLEWIDTH, 
+                                        Constants.TRIANGLEHEIGHT, 
+                                        Color.red, 
+                                        50, 
+                                        Constants.TRIANGLEDETECTZONE));
+        }
     }
 
     public void paintComponent(Graphics g) {
@@ -156,7 +205,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             deleteOutOfScreenBullets();
 
             if (mouseLeftClicked == 2 && player.getEnergy() > 0) {
-                if (!player.isAttacking()){
+                if (!player.isAttacking() && !player.isDodging() && !player.isKnockBacking() && !player.isHealing()){
                     double bulletDx = (double) (leftClickX - player.getCenterX());
                     double bulletDy = (double) (leftClickY - player.getCenterY());
                     double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
@@ -180,8 +229,10 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 spacePressed = 0;
             }
 
-            if(rPressed) {
-                player.increaseHealth(0.5);
+            if(rPressed == 2) {
+                player.increaseHealth();
+                musicPlayer.playSegment("Estus", 0.0f, 2f, false);
+                rPressed = 0;
             }
 
             if(escPressed) {
@@ -223,10 +274,11 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                     enemies.clear();
                     bullets.clear();
                     coins.clear();
-                    spawnEnemies();
 
-                    timer1.stop();
+                    if (spawnEnemiesDelay < spawnEnemiesMaxDelay) spawnEnemiesDelay += spawnEnemiesStep;
+
                     timer2.stop();
+                    timer4.stop();
                 }
             }
             else {
@@ -291,6 +343,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                         }
                         if (e instanceof BigTriangle) {
                             timer3.start();
+                            System.out.println("timer3");
                         }
                         enemy.remove();
                         musicPlayer.playSegment("Kill", 0.0f, 1f, false);
@@ -307,8 +360,9 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 Rectangle eRect = e.getBounds();
                 if (pRect.intersects(eRect)) {
                     if (!player.isKnockBacking() && !player.isInvincible()){
-                        player.getHurt(e.getDamage());
-                        player.knockBack(e.getCenterX(), e.getCenterY(), 10, 30);
+                        int damage = e.getDamage();
+                        player.getHurt(damage);
+                        player.knockBack(e.getCenterX(), e.getCenterY(), damage / 3, 30);
                         if (player.getHealth() <= 0 && !isGameOver) {
                             disablePlayerInput();
                             isGameOver = true;
@@ -347,6 +401,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
     public void resumeGame() {
         paused = false;
+        if (stopSpawmEnemies) timer2.start();
+        else timer4.start();
     }
 
     public void restartGame() {
@@ -368,7 +424,16 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         enemies.clear();
         bullets.clear();
         coins.clear();
-        spawnEnemies();
+        
+        paused = false;
+        playerInput = true;
+        enemyMove = true;
+        isGameOver = false;
+        showBonfireText = false;
+        inBonfire = false;
+
+        spawnEnemiesDelay = spawnEnemiesMaxDelay;
+        stopSpawmEnemies = false;
 
         wPressed = false;
         aPressed = false;
@@ -387,17 +452,12 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         mouseX = 0;
         mouseY = 0;
 
-        paused = false;
-        playerInput = true;
-        enemyMove = true;
-        isGameOver = false;
-
         timer1.start();
-        timer2.start();
+        timer4.start();
     }
 
     public void disablePlayerInput() {
-        playerInput = false;
+        playerInput = true;
 
         wPressed = false;
         aPressed = false;
@@ -405,6 +465,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         dPressed = false;
         ePressed = false;
         escPressed = false;
+        rPressed = 0;
         spacePressed = 0;
     
         mouseLeftClicked = 0;
@@ -426,7 +487,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 case KeyEvent.VK_S -> sPressed = true;
                 case KeyEvent.VK_D -> dPressed = true;
                 case KeyEvent.VK_E -> ePressed = true;
-                case KeyEvent.VK_R -> rPressed = true;
+                case KeyEvent.VK_R -> rPressed = 1;
                 case KeyEvent.VK_SPACE -> spacePressed = 1;
                 case KeyEvent.VK_ESCAPE -> escPressed = true;
             }
@@ -442,7 +503,9 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 case KeyEvent.VK_S -> sPressed = false;
                 case KeyEvent.VK_D -> dPressed = false;
                 case KeyEvent.VK_E -> ePressed = false;
-                case KeyEvent.VK_R -> rPressed = false;
+                case KeyEvent.VK_R -> {
+                    if(rPressed == 1) rPressed = 2;
+                }
                 case KeyEvent.VK_SPACE -> {
                     if(spacePressed == 1) spacePressed = 2;
                 }

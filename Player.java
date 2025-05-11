@@ -41,7 +41,7 @@ public class Player{
         this.color = c;
         this.currentHealth = health;
         this.currentEnergy = energy;
-        this.exp = 0;
+        this.exp = 100;
         this.estus = Constants.PLAYERESTUSNUM;
     }
 
@@ -116,7 +116,7 @@ public class Player{
 
         if (healingCoolDown > 0){
             if (healingTimer > 0) {
-                currentHealth = Math.min(currentHealth + 1, (int) Constants.playerActualHP);
+                currentHealth = Math.min(currentHealth + (int) (Constants.playerActualHP * 0.01), (int) Constants.playerActualHP);
                 healingTimer -= 1;
             }
             healingCoolDown -= 1;
@@ -190,6 +190,14 @@ public class Player{
         return knockBacking;
     }
 
+    boolean isDodging() {
+        return dodging;
+    }
+
+    boolean isHealing() {
+        return healing;
+    }
+
     boolean isInvincible() {
         return invincible;
     }
@@ -222,12 +230,12 @@ public class Player{
         return currentHealth;
     }
 
-    void increaseHealth(double h) {
+    void increaseHealth() {
         if (estus > 0) {
             if (!attacking && !dodging && !knockBacking && !healing) {
                 estus -= 1;
                 healing = true;
-                healingTimer = 30;
+                healingTimer = 40;
                 healingCoolDown = 50;
             }
         }

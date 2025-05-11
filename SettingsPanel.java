@@ -46,7 +46,12 @@ public class SettingsPanel extends JPanel {
             startPanel.revalidate();
             startPanel.repaint();
             layeredPane.moveToFront(startPanel);
+            musicPlayer.stopById("BigTriangle");
             musicPlayer.playSegment("StartMenu", 0f, 186f, true);
+            gamePanel.timer1.stop();
+            gamePanel.timer2.stop();
+            gamePanel.timer3.stop();
+            gamePanel.timer4.stop();
         });
 
         buttonPanel.add(resumeButton);

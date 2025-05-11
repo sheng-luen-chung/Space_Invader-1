@@ -16,8 +16,8 @@ public class Triangle extends Enemy{
     public int attackEndTime = 0;
     public int attackCoolDown = 0;
 
-    Triangle(int x, int y, int w, int h, Color c, int health) {
-        super(x, y, w, h, c, health);
+    Triangle(int x, int y, int w, int h, Color c, int health, int detectZone) {
+        super(x, y, w, h, c, health, detectZone);
         this.xPoints = new int[] {
             (int) (x),
             (int) (x + (double) w / 2),
@@ -54,7 +54,7 @@ public class Triangle extends Enemy{
         dy = playerY - centerY;
 
         double dxdy = Math.sqrt(dx * dx + dy * dy);
-        if (dxdy <= 400) {
+        if (dxdy <= detectZone) {
             state = 1;
         }
     }

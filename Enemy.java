@@ -27,6 +27,7 @@ public class Enemy{
     public int knockBackSpeed = 0;
     public int knockBackTimer = 0;
 
+    public int detectZone = 0;
 
     public Enemy() {
         this.x = 100;
@@ -37,9 +38,10 @@ public class Enemy{
         this.color = Color.RED;
         this.maxHealth = 100;
         this.currentHealth = 100;
+        this.detectZone = 100;
     }
 
-    public Enemy(int x, int y, int w, int h, Color c, int health) {
+    public Enemy(int x, int y, int w, int h, Color c, int health, int detectZone) {
         this.x = x;
         this.y = y;
         this.width = w;
@@ -48,6 +50,7 @@ public class Enemy{
         this.color = c;
         this.maxHealth = health;
         this.currentHealth = health;
+        this.detectZone = detectZone;
     }
 
     public void move(double playerX, double playerY) {
@@ -63,7 +66,7 @@ public class Enemy{
         double dy = playerY - getCenterY();
 
         double dxdy = Math.sqrt(dx * dx + dy * dy);
-        if (dxdy <= 100) {
+        if (dxdy <= detectZone) {
             state = 1;
         }
     }

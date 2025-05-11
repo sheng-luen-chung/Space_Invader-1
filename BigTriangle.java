@@ -13,13 +13,13 @@ public class BigTriangle extends Triangle{
 
     private boolean isSummoned = false;
 
-    ArrayList<Enemy> enemies;
+    private int phaseChangeTimer = 0;
+
     List<Enemy> enemiesToAdd;
 
 
-    BigTriangle(int x, int y, int w, int h, Color c, int health, ArrayList<Enemy> enemies) {
-        super(x, y, w, h, c, health);
-        this.enemies = enemies;
+    BigTriangle(int x, int y, int w, int h, Color c, int health, int detectZone) {
+        super(x, y, w, h, c, health, detectZone);
         this.enemiesToAdd = new ArrayList<>();
         this.attackDamage = 25;
     }
@@ -31,6 +31,7 @@ public class BigTriangle extends Triangle{
             case 1 -> stateMove(playerX, playerY);
             case 2 -> stateKnockBack();
             case 3 -> stateAttack(playerX, playerY);
+            case 4 -> statePhaseChange();
         }
         if (getHurtTimer > 0) {
             getHurtTimer -= 1;
@@ -124,44 +125,52 @@ public class BigTriangle extends Triangle{
             }
             if (distance <= 250) {
                 state = 3;
+                double rand = Math.random();
                 if (phase == 0) {
-                    attackType = 0;
+                    if (rand < 0.7) {
+                        attackType = 0;
+                    }
+                    else {
+                        attackType = 1;
+                    }
                     attackTypeCounter = 1;
                 }
                 else {
-                    double rand = Math.random();
                     if (rand < 0.4) {
                         attackType = 0;
                     }
                     else if (rand < 0.6) {
                         attackType = 1;
                     }
-                    else {
+                    else if (rand < 0.9) {
                         attackType = 2;
+                    }
+                    else {
+                        attackType = 3;
                     }
                     attackTypeCounter = 1 + (int) (Math.random() * 3);
                 }
             }
         }
         else if (moveType == 1) {
-                if (distance < rotationRadius) rotationRadius = distance;
-                if (Math.abs(distance - rotationRadius) > 10) {
-                    dx /= distance;
-                    dy /= distance;
-                    double radialDir = (distance > rotationRadius) ? 1 : -1;
-                    centerX += dx * speed * radialDir;
-                    centerY += dy * speed * radialDir;
-                }
+            if (distance < rotationRadius) rotationRadius = distance;
+            if (Math.abs(distance - rotationRadius) > 10) {
+                dx /= distance;
+                dy /= distance;
+                double radialDir = (distance > rotationRadius) ? 1 : -1;
+                centerX += dx * speed * radialDir;
+                centerY += dy * speed * radialDir;
+            }
 
-                double tangentX = -dy * rotateDirection;
-                double tangentY = dx * rotateDirection;
-                double norm = Math.sqrt(tangentX * tangentX + tangentY * tangentY);
-                if (norm != 0) {
-                    tangentX /= norm;
-                    tangentY /= norm;
-                    centerX += tangentX * speed;
-                    centerY += tangentY * speed;
-                }
+            double tangentX = -dy * rotateDirection;
+            double tangentY = dx * rotateDirection;
+            double norm = Math.sqrt(tangentX * tangentX + tangentY * tangentY);
+            if (norm != 0) {
+                tangentX /= norm;
+                tangentY /= norm;
+                centerX += tangentX * speed;
+                centerY += tangentY * speed;
+            }
         }
 
         if (moveTypeTimer > 0) {
@@ -175,9 +184,8 @@ public class BigTriangle extends Triangle{
 
         if (phase == 0 && currentHealth < (double) maxHealth / 2) {
             phase = 1;
-            attackType = 2;
-            attackTypeCounter = 4;
-            state = 3;
+            phaseChangeTimer = 100;
+            state = 4;
         }
 
         rotateTri();
@@ -187,39 +195,55 @@ public class BigTriangle extends Triangle{
     public void stateAttack(double playerX, double playerY) {
         if (!attacking) {
             attackSpeed = 20;
-            if (attackType == 0) {
-                if (phase == 0) {
-                    attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
-                    attackCoolDown = Constants.TRIANGLEATTACKCOOLDOWN;
-                }
-                else {
-                    attackStartTime = (int) (1.5 * Constants.TRIANGLEATTACKSTARTTIME);
+            switch (attackType) {
+                case 0:
+                    if (phase == 0) {
+                        attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
+                        attackEndTime = Constants.TRIANGLEATTACKENDTIME;
+                        attackCoolDown = Constants.TRIANGLEATTACKCOOLDOWN;
+                    } else {
+                        attackStartTime = (int) (1.5 * Constants.TRIANGLEATTACKSTARTTIME);
+                        attackEndTime = Constants.TRIANGLEATTACKENDTIME;
+                        attackCoolDown = (int) (1.25 * Constants.TRIANGLEATTACKCOOLDOWN);
+                    }
+                    break;
+                case 1:
+                    attackStartTime = (int) (2 * Constants.TRIANGLEATTACKSTARTTIME);
+                    attackEndTime = (int) (2 * Constants.TRIANGLEATTACKENDTIME);
+                    attackCoolDown = (int) (1.5 * Constants.TRIANGLEATTACKCOOLDOWN);
+                    break;
+                case 2:
+                    attackStartTime = 2 * Constants.TRIANGLEATTACKSTARTTIME;
+                    attackEndTime = Constants.TRIANGLEATTACKENDTIME;
                     attackCoolDown = (int) (1.25 * Constants.TRIANGLEATTACKCOOLDOWN);
-                }
+                    break;
+                case 3:
+                    attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
+                    attackEndTime = Constants.TRIANGLEATTACKENDTIME;
+                    attackCoolDown = (int) (0.5 * Constants.TRIANGLEATTACKCOOLDOWN);
+                    break;
             }
-            else if (attackType == 1) {
-                attackStartTime = Constants.TRIANGLEATTACKSTARTTIME;
-                attackCoolDown = (int) (0.5 * Constants.TRIANGLEATTACKCOOLDOWN);
-            }
-            else if (attackType == 2) {
-                attackStartTime = 2 * Constants.TRIANGLEATTACKSTARTTIME;
-                attackCoolDown = (int) (1.25 * Constants.TRIANGLEATTACKCOOLDOWN);
-            }
-            attackEndTime = Constants.TRIANGLEATTACKENDTIME;
             attacking = true;
             isSummoned = false;
         }
         else {
-            if (attackType == 0) {
-                sprintAttack(playerX, playerY);
-            }
-            else if (attackType == 1) {
-                if (!isSummoned){
-                    summonTriangleMinions(2 + (int) (Math.random() * 3));
-                }
-            }
-            else if (attackType == 2) {
-                sprintsprintAttack(playerX, playerY);
+            switch (attackType) {
+                case 0:
+                    sprintAttack(playerX, playerY);
+                    break;
+                case 1:
+                    heavyAttack(playerX, playerY);
+                    break;
+                case 2:
+                    sprintsprintAttack(playerX, playerY);
+                    break;
+                case 3:
+                    if (!isSummoned) {
+                        summonTriangleMinions(2 + (int) (Math.random() * 3));
+                    }
+                    break;
+                default:
+                    throw new AssertionError();
             }
 
             if (attackCoolDown > 0) {
@@ -234,10 +258,30 @@ public class BigTriangle extends Triangle{
                     moveType = 1;
                 }
                 attacking = false;
-                rotateDirection *= -1;
+                rotateDirection = Math.random() < 0.5 ? -1 : 1;
             }
         }
         rotateTri();
+    }
+
+    public void statePhaseChange() {
+        if (phaseChangeTimer > 0) {
+            if (phaseChangeTimer % 10 > 6) {
+                color = Color.WHITE;
+            }
+            else if (phaseChangeTimer % 10 <= 6 && phaseChangeTimer % 10 > 3) {
+                color = Color.ORANGE;
+            }
+            else {
+                color = oriColor;
+            }
+            phaseChangeTimer -= 1;
+        }
+        else {
+            attackType = 2;
+            attackTypeCounter = 4;
+            state = 3;
+        }
     }
 
     @Override
@@ -255,7 +299,16 @@ public class BigTriangle extends Triangle{
     
     @Override
     public int getDamage() {
-        return (int) (attackDamage - 5 + Math.random() * 10);
+        switch (attackType) {
+            case 0:
+                return (int) (attackDamage - 5 + Math.random() * 5);
+            case 1:
+                return (int) (attackDamage + 10 + Math.random() * 5);
+            case 2:
+                return (int) (attackDamage - 10 + Math.random() * 5);
+            default:
+                return (int) (attackDamage - 5 + Math.random() * 5);
+        }
     }
 
     @Override
@@ -287,8 +340,7 @@ public class BigTriangle extends Triangle{
             getHurtCounter = 0;
         }
     }
-
-    
+ 
     private void sprintAttack(double playerX, double playerY) {
         if (attackStartTime > 0) {
             centerX = getCenterX();
@@ -339,6 +391,36 @@ public class BigTriangle extends Triangle{
         }
     }
 
+    private void heavyAttack(double playerX, double playerY) {
+        if (attackStartTime > 0) {
+            centerX = getCenterX();
+            centerY = getCenterY();
+            attackdx = playerX - centerX;
+            attackdy = playerY - centerY;
+            double dxdy = Math.sqrt(attackdx * attackdx + attackdy * attackdy);
+            attackdx /= dxdy;
+            attackdy /= dxdy;
+            centerX -= attackdx * 2;
+            centerY -= attackdy * 2;
+            if (attackStartTime % 10 >= 5) {
+                color = Color.YELLOW;
+            }
+            else {
+                color = oriColor;
+            }
+            attackStartTime -= 1;
+        }
+        else {
+            if (attackEndTime > 0) {
+                color = oriColor;
+                centerX += attackdx * attackSpeed;
+                centerY += attackdy * attackSpeed;
+                attackEndTime -= 1;
+                damagePlayer = true;
+            }
+        }
+    }
+
     private void sprintsprintAttack(double playerX, double playerY) {
         if (attackStartTime > 0) {
             centerX = getCenterX();
@@ -363,10 +445,10 @@ public class BigTriangle extends Triangle{
                     color = Color.WHITE;
                 }
                 else if (attackStartTime >= (double) Constants.TRIANGLEATTACKSTARTTIME / 6 && 
-                    attackStartTime < (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 4) {
+                    attackStartTime < (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 3) {
                     color = Color.BLACK;
                 }
-                else if (attackStartTime >= (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 4 && 
+                else if (attackStartTime >= (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 3 && 
                     attackStartTime < (double) Constants.TRIANGLEATTACKSTARTTIME / 6 * 5) {
                     color = Color.WHITE;
                 }
@@ -404,7 +486,12 @@ public class BigTriangle extends Triangle{
             for (int i = 0; i < num; i++) {
                 int offsetX = (int)(Math.random() * 100 - 50);
                 int offsetY = (int)(Math.random() * 100 - 50);
-                Triangle minion = new Triangle((int)centerX + offsetX, (int)centerY + offsetY, 20, (int) (20 * 1.732 / 2), Color.ORANGE, 1);
+                Triangle minion = new Triangle((int)centerX + offsetX, 
+                                               (int)centerY + offsetY, 
+                                               20, 
+                                               (int) (20 * 1.732 / 2), 
+                                               Color.ORANGE, 1, 
+                                               Constants.SMALLTRIANGLEDETECTZONE);
                 enemiesToAdd.add(minion);
                 isSummoned = true;
             }

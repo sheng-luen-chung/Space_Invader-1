@@ -28,9 +28,17 @@ public class Constants {
     public static int levelUpCost = 0;
     public static float currentVolume = 10.0f;
 
+
+    public static final int TRIANGLEWIDTH = 50;
+    public static final int TRIANGLEHEIGHT = (int) (TRIANGLEWIDTH * 1.732 / 2);
+
     public static final int TRIANGLEATTACKSTARTTIME = 50;
     public static final int TRIANGLEATTACKENDTIME = 15;
     public static final int TRIANGLEATTACKCOOLDOWN = 100;
+
+    public static final int SMALLTRIANGLEDETECTZONE = 1000;
+    public static final int TRIANGLEDETECTZONE = 1000;
+    public static final int BIGTRIANGLEDETECTZONE = 10000;
 
     private static final double HPK = 0.2;
     private static final double STRK = 0.1;
