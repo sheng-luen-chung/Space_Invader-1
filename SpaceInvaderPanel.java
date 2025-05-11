@@ -99,6 +99,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             public void actionPerformed(ActionEvent e) {
                 musicPlayer.adjustVolume(-1);
                 if (musicPlayer.getCurrentVolume() < 1){
+                    System.out.println("Big Triangle");
                     musicPlayer.stopById("BigTriangle");
                     musicPlayer.adjustVolume(10);
                     timer3.stop();
@@ -108,16 +109,14 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         timer4 = new Timer(spawnEnemiesDelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                spawnEnemies();
-                if (spawnEnemiesDelay > spawnEnemiesMinDelay) {
-                    spawnEnemiesDelay -= spawnEnemiesStep;
-                    System.out.println(spawnEnemiesDelay);
-                }
-                if (spawnEnemiesDelay == spawnEnemiesMinDelay) {
+                if (spawnEnemiesDelay == spawnEnemiesMinDelay && enemies.isEmpty()) {
                     stopSpawmEnemies = true;
                     timer4.stop();
                     timer2.start();
-                    System.out.println("Big Triangle");
+                }
+                else if (spawnEnemiesDelay > spawnEnemiesMinDelay) {
+                    spawnEnemies();
+                    spawnEnemiesDelay -= spawnEnemiesStep;
                 }
             }
         });
