@@ -27,10 +27,18 @@ public class Explode {
     }
 
     void draw(Graphics g) {
-        g.setColor(Color.BLUE);
+        g.setColor(Color.RED);
         double healthPercant = 1 - (double) currentHealth / maxHealth;
         w = width * Math.exp(healthPercant);
         h = height * Math.exp(healthPercant);
+        g.fillOval((int) (centerX - w / 2), (int) (centerY - h / 2), (int) (w), (int) (h));
+        g.setColor(Color.ORANGE);
+        w = width * Math.exp(healthPercant) / 1.5;
+        h = height * Math.exp(healthPercant) / 1.5;
+        g.fillOval((int) (centerX - w / 2), (int) (centerY - h / 2), (int) (w), (int) (h));
+        g.setColor(Color.YELLOW);
+        w = width * Math.exp(healthPercant) / 2;
+        h = height * Math.exp(healthPercant) / 2;
         g.fillOval((int) (centerX - w / 2), (int) (centerY - h / 2), (int) (w), (int) (h));
     }
 
