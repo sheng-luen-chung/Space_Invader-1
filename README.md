@@ -606,6 +606,7 @@ flowchart TD
     U --> G
     X --> G
     R --> G
+    Q --> G
     N --> G
     T --> G
     W --> G
@@ -687,3 +688,4 @@ sequenceDiagram
     SpaceInvaderPanel ->> MusicPlayer: Adjust volume on BigTriangle phase change
 
 ```
+
