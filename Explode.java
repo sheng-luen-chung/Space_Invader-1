@@ -9,8 +9,9 @@ public class Explode {
     private int damage = 15;
     private int maxHealth = 0;
     private int currentHealth = 0;
+    private String tag;
 
-    Explode(int x, int y, int w, int h, Color c, int health) {
+    Explode(int x, int y, int w, int h, Color c, int health, int damage, String tag) {
         this.x = x;
         this.y = y;
         this.width = w;
@@ -20,6 +21,8 @@ public class Explode {
         this.color = c;
         this.maxHealth = health;
         this.currentHealth = health;
+        this.damage = damage;
+        this.tag = tag;
     }
 
     void getHurt(int damage) {
@@ -43,7 +46,7 @@ public class Explode {
     }
 
     int getDamage() {
-        return damage;
+        return damage + (int) Constants.playerActualSTR * 10;
     }
     
     double getCenterX() {
@@ -56,6 +59,10 @@ public class Explode {
 
     double getHealth(){
         return currentHealth;
+    }
+
+    String getTag() {
+        return tag;
     }
 
     Rectangle getBounds() {

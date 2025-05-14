@@ -103,9 +103,17 @@ public class Enemy{
         }
     }
 
+    public void stateAttack(double playerX, double playerY) {
+
+    }
+
+    public void rotate() {
+        
+    }
+
     public void getHurt(int damage) {
         if (!getHurting && !knockBacking){
-            currentHealth -= damage + (int) (Constants.playerActualSTR * 10);
+            currentHealth -= damage;
             getHurting = true;
             getHurtTimer = 5;
             getHurtCounter += 1;

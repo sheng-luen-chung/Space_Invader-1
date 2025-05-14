@@ -8,8 +8,9 @@ public class Bullet{
     private int damage = 20;
     private double  dx = 0;
     private double dy = 0;
+    private String tag;
 
-    Bullet(int x, int y, int w, int h, Color c, double dx, double dy) {
+    Bullet(int x, int y, int w, int h, Color c, double dx, double dy, int damage, String tag) {
         this.x = x;
         this.y = y;
         this.width = w;
@@ -17,6 +18,8 @@ public class Bullet{
         this.color = c;
         this.dx = dx;
         this.dy = dy;
+        this.damage = damage;
+        this.tag = tag;
     }
 
     void move() {
@@ -38,6 +41,10 @@ public class Bullet{
 
     int getHeight() {
         return height;
+    }
+
+    String getTag() {
+        return tag;
     }
 
     void draw(Graphics g) {

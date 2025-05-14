@@ -7,7 +7,7 @@ public class Triangle extends Enemy{
     public double dy = 0;
     public int[] xPoints = new int[3];
     public int[] yPoints = new int[3];
-    
+
     public double attackdx = 0;
     public double attackdy = 0;
     public int attackSpeed = 0;
@@ -76,7 +76,7 @@ public class Triangle extends Enemy{
         if (dxdy <= 100) {
             state = 3;
         }
-        rotateTri();
+        rotate();
     }
 
     @Override
@@ -91,9 +91,10 @@ public class Triangle extends Enemy{
             state = 1;
             knockBacking = false;
         }
-        rotateTri();
+        rotate();
     }
 
+    @Override
     public void stateAttack(double playerX, double playerY) {
         if (!attacking) {
             centerX = getCenterX();
@@ -139,10 +140,11 @@ public class Triangle extends Enemy{
                 attacking = false;
             }
         }
-        rotateTri();
+        rotate();
     }
 
-    public void rotateTri() {
+    @Override
+    public void rotate() {
         double angle;
         double radius = height * 2.0 / 3;
 

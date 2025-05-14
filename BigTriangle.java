@@ -17,7 +17,6 @@ public class BigTriangle extends Triangle{
 
     List<Enemy> enemiesToAdd;
 
-
     BigTriangle(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone) {
         super(x, y, w, h, c, attackDamage, health, detectZone);
         this.enemiesToAdd = new ArrayList<>();
@@ -187,7 +186,7 @@ public class BigTriangle extends Triangle{
             state = 4;
         }
 
-        rotateTri();
+        rotate();
     }
 
     @Override
@@ -260,7 +259,7 @@ public class BigTriangle extends Triangle{
                 rotateDirection = Math.random() < 0.5 ? -1 : 1;
             }
         }
-        rotateTri();
+        rotate();
     }
 
     public void statePhaseChange() {
@@ -287,7 +286,7 @@ public class BigTriangle extends Triangle{
     public void getHurt(int damage) {
         if (!getHurting && !knockBacking){
             color = oriColor;
-            currentHealth -= damage + (int) (Constants.playerActualSTR * 10);
+            currentHealth -= damage;
             getHurting = true;
             getHurtTimer = 5;
             getHurtCounter += 1;
@@ -310,6 +309,10 @@ public class BigTriangle extends Triangle{
         }
     }
 
+    public int getPhase() {
+        return phase;
+    }
+
     @Override
     public void stateKnockBack() {
         if (knockBackTimer > 0){
@@ -326,7 +329,7 @@ public class BigTriangle extends Triangle{
             state = 1;
             knockBacking = false;
         }
-        rotateTri();
+        rotate();
     }
 
     @Override
@@ -502,9 +505,5 @@ public class BigTriangle extends Triangle{
                 isSummoned = true;
             }
         }
-    }
-
-    public int getPhase() {
-        return phase;
     }
 }

@@ -9,8 +9,9 @@ import javax.swing.*;
 public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyListener, MouseListener{
     Timer timer1, timer2, timer3, timer4;
     ArrayList<Enemy> enemies = new ArrayList<>();
-    ArrayList<Bullet> bullets = new ArrayList<>();
     List<Enemy> enemiesToAdd = new ArrayList<>();
+    ArrayList<Bullet> bullets = new ArrayList<>();
+    List<Bullet> bulletsToAdd = new ArrayList<>();
     ArrayList<Explode> explodes = new ArrayList<>();
     ArrayList<Coin> coins = new ArrayList<>();
     Player player;
@@ -98,7 +99,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 }
             }
         });
-        timer4 = new Timer(spawnEnemiesDelay, new ActionListener() {
+        timer4 = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (spawnEnemiesDelay == spawnEnemiesMinDelay && enemies.isEmpty()) {
@@ -115,39 +116,46 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     }
 
     void spawnEnemies() {
-        Random rand = new Random();
-        int x = 0, y = 0;
-        int times = 11 - spawnEnemiesDelay / 1000 + rand.nextInt(3);
+        enemies.add(new Square(200, 200, 
+                                50, 
+                                50, 
+                                Color.red, 
+                                (int) (15 * Math.pow(1.25, Constants.nRuns + 1)), 
+                                (int) (50 * Math.pow(1.1, Constants.nRuns)), 
+                                Constants.TRIANGLEDETECTZONE));
+        // Random rand = new Random();
+        // int x = 0, y = 0;
+        // int times = 11 - spawnEnemiesDelay / 1000 + rand.nextInt(3);
 
-        for (int a = 0; a < times; a++) {
-            int side = rand.nextInt(4); // 0 = top, 1 = bottom, 2 = left, 3 = right
+        // for (int a = 0; a < times; a++) {
+        //     int side = rand.nextInt(4); // 0 = top, 1 = bottom, 2 = left, 3 = right
 
-            switch (side) {
-                case 0: // Top
-                    x = rand.nextInt(Constants.FRAMEWIDTH);
-                    y = -Constants.TRIANGLEHEIGHT;
-                    break;
-                case 1: // Bottom
-                    x = rand.nextInt(Constants.FRAMEWIDTH);
-                    y = Constants.FRAMEHEIGHT;
-                    break;
-                case 2: // Left
-                    x = -Constants.TRIANGLEWIDTH;
-                    y = rand.nextInt(Constants.FRAMEHEIGHT);
-                    break;
-                case 3: // Right
-                    x = Constants.FRAMEWIDTH;
-                    y = rand.nextInt(Constants.FRAMEHEIGHT);
-                    break;
-            }
-            enemies.add(new Triangle(x, y, 
-                                        Constants.TRIANGLEWIDTH, 
-                                        Constants.TRIANGLEHEIGHT, 
-                                        Color.red, 
-                                        (int) (15 * Math.pow(1.25, Constants.nRuns + 1)), 
-                                        (int) (50 * Math.pow(1.1, Constants.nRuns)), 
-                                        Constants.TRIANGLEDETECTZONE));
-        }
+        //     switch (side) {
+        //         case 0: // Top
+        //             x = rand.nextInt(Constants.FRAMEWIDTH);
+        //             y = -Constants.TRIANGLEHEIGHT;
+        //             break;
+        //         case 1: // Bottom
+        //             x = rand.nextInt(Constants.FRAMEWIDTH);
+        //             y = Constants.FRAMEHEIGHT;
+        //             break;
+        //         case 2: // Left
+        //             x = -Constants.TRIANGLEWIDTH;
+        //             y = rand.nextInt(Constants.FRAMEHEIGHT);
+        //             break;
+        //         case 3: // Right
+        //             x = Constants.FRAMEWIDTH;
+        //             y = rand.nextInt(Constants.FRAMEHEIGHT);
+        //             break;
+        //     }
+        //     enemies.add(new Triangle(x, y, 
+        //                                 Constants.TRIANGLEWIDTH, 
+        //                                 Constants.TRIANGLEHEIGHT, 
+        //                                 Color.red, 
+        //                                 (int) (15 * Math.pow(1.25, Constants.nRuns + 1)), 
+        //                                 (int) (50 * Math.pow(1.1, Constants.nRuns)), 
+        //                                 Constants.TRIANGLEDETECTZONE));
+        // }
     }
 
     @Override
@@ -200,9 +208,15 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                     }
                     bt.enemiesToAdd.clear();
                 }
+                else if (enemy instanceof Square s) {
+                    bulletsToAdd.addAll(s.bulletsToAdd);
+                    s.bulletsToAdd.clear();
+                }
             }
             enemies.addAll(enemiesToAdd);
             enemiesToAdd.clear();
+            bullets.addAll(bulletsToAdd);
+            bulletsToAdd.clear();
 
             for(Bullet bullet : bullets) {
                 bullet.move();
@@ -223,7 +237,10 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                                            (int) player.getCenterY() - 10, 
                                            20, 20, 
                                            Color.YELLOW, 
-                                           bulletDx, bulletDy));
+                                           bulletDx, 
+                                           bulletDy, 
+                                           (int) (Constants.playerActualSTR * 10), 
+                                           "Player"));
                     musicPlayer.playSegment("FireBall", 0.0f, 2.0f, false);
                     player.attack();
                 }
@@ -258,6 +275,18 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     }
 
     void checkCollisions() {
+        bonfireCheck();
+
+        bulletCollisions();
+
+        explodeCollisions();
+        
+        enemyPlayerCollisions();
+        
+        coinPlayerCollisions();
+    }
+
+    void bonfireCheck() {
         if (!inBonfire) {
             double dx = (double) (player.getCenterX() - campFire.getCenterX());
             double dy = (double) (player.getCenterY() - campFire.getCenterY());
@@ -301,29 +330,62 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 player.restoreHealth();
             }
         }
+    }
 
+    void bulletCollisions() {
         Iterator<Bullet> bullet = bullets.iterator(); // bullet & enemy
         while (bullet.hasNext()) {
             Bullet b = bullet.next();
+            Rectangle bRect = b.getBounds();
 
-            Iterator<Enemy> enemy = enemies.iterator();
-            while (enemy.hasNext()) {
-                Enemy e = enemy.next();
-
-                Rectangle bRect = b.getBounds();
-                Rectangle eRect = e.getBounds();
-                if (bRect.intersects(eRect)) {
-                    Rectangle intersection = bRect.intersection(eRect);
+            if ("Player".equals(b.getTag())) {
+                Iterator<Enemy> enemy = enemies.iterator();
+                while (enemy.hasNext()) {
+                    Enemy e = enemy.next();
+    
+                    Rectangle eRect = e.getBounds();
+                    if (bRect.intersects(eRect)) {
+                        Rectangle intersection = bRect.intersection(eRect);
+                        int collisionX = intersection.x;
+                        int collisionY = intersection.y;
+    
+                        explodes.add(new Explode(collisionX, 
+                                                 collisionY, 
+                                                 b.getWidth(), 
+                                                 b.getHeight(), 
+                                                 Color.RED, 
+                                                 100, 
+                                                 15, 
+                                                 "Player"));
+                        bullet.remove();
+                        break;
+                    }
+                }
+            }
+            else if ("Enemy".equals(b.getTag())) {
+                Rectangle playerRect = player.getBounds();
+                if (bRect.intersects(playerRect)) {
+                    Rectangle intersection = bRect.intersection(playerRect);
                     int collisionX = intersection.x;
                     int collisionY = intersection.y;
 
-                    explodes.add(new Explode(collisionX, collisionY, b.getWidth(), b.getHeight(), Color.RED, 100));
-
+                    explodes.add(new Explode(collisionX, 
+                                             collisionY, 
+                                             b.getWidth(), 
+                                             b.getHeight(), 
+                                             Color.RED, 
+                                             100, 
+                                             15, 
+                                             "Enemy"));
                     bullet.remove();
                     break;
                 }
             }
+            
         }
+    }
+
+    void explodeCollisions() {
         Iterator<Explode> explode = explodes.iterator(); // explode & enemy
         while (explode.hasNext()) {
             Explode b = explode.next();
@@ -332,32 +394,52 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 explode.remove();
             }
 
-            Iterator<Enemy> enemy = enemies.iterator();
-            while (enemy.hasNext()) {
-                Enemy e = enemy.next();
+            Rectangle bRect = b.getBounds();
+            if ("Player".equals(b.getTag())) {
+                Iterator<Enemy> enemy = enemies.iterator();
+                while (enemy.hasNext()) {
+                    Enemy e = enemy.next();
 
-                Rectangle bRect = b.getBounds();
-                Rectangle eRect = e.getBounds();
-                if (bRect.intersects(eRect)) {
-                    e.getHurt(b.getDamage());
-                    e.knockBack(b.getCenterX(), b.getCenterY(), 10, 10);
-                    if (e.getHealth() <= 0) {
-                        for (int a = (int) (e.getMaxHealth()); a > 0; a-= 20) {
-                            int offsetX = (int)(Math.random() * 100 - 50);
-                            int offsetY = (int)(Math.random() * 100 - 50);
-                            coins.add(new Coin(e.getCenterX() + offsetX, e.getCenterY() + offsetY, (int) (8 + Math.random() * 4)));
+                    Rectangle eRect = e.getBounds();
+                    if (bRect.intersects(eRect)) {
+                        e.getHurt(b.getDamage());
+                        e.knockBack(b.getCenterX(), b.getCenterY(), 10, 10);
+                        if (e.getHealth() <= 0) {
+                            for (int a = (int) (e.getMaxHealth()); a > 0; a-= 20) {
+                                int offsetX = (int)(Math.random() * 100 - 50);
+                                int offsetY = (int)(Math.random() * 100 - 50);
+                                coins.add(new Coin(e.getCenterX() + offsetX, e.getCenterY() + offsetY, (int) (8 + Math.random() * 4)));
+                            }
+                            if (e instanceof BigTriangle) {
+                                timer3.start();
+                                enemyFall = true;
+                                Constants.nRuns = Math.min(Constants.nRuns + 1, 10);
+                            }
+                            enemy.remove();
+                            musicPlayer.playSegment("Kill", 0.0f, 1f, false);
                         }
-                        if (e instanceof BigTriangle) {
-                            timer3.start();
-                            enemyFall = true;
-                            Constants.nRuns = Math.min(Constants.nRuns + 1, 10);
+                    }
+                }
+            }
+            else if ("Enemy".equals(b.getTag())) {
+                Rectangle playerRect = player.getBounds();
+                if (bRect.intersects(playerRect)) {
+                    if (!player.isKnockBacking() && !player.isInvincible()){
+                        int damage = b.getDamage();
+                        player.getHurt(damage);
+                        player.knockBack(b.getCenterX(), b.getCenterY(), damage / 3, 30);
+                        if (player.getHealth() <= 0 && !isGameOver) {
+                            disablePlayerInput();
+                            isGameOver = true;
+                            gameOverPanel.triggerFadeIn();
                         }
-                        enemy.remove();
-                        musicPlayer.playSegment("Kill", 0.0f, 1f, false);
                     }
                 }
             }
         }
+    }
+
+    void enemyPlayerCollisions() {
         Iterator<Enemy> enemy = enemies.iterator();
         while (enemy.hasNext()) {
             Enemy e = enemy.next();
@@ -379,6 +461,9 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                 }
             }
         }
+    }
+
+    void coinPlayerCollisions() {
         Iterator<Coin> coin = coins.iterator();
         while (coin.hasNext()) {
             Coin c = coin.next();
@@ -391,7 +476,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             }
         }
     }
-    
+
     void deleteOutOfScreenBullets() {
         Iterator<Bullet> bullet = bullets.iterator();
         while (bullet.hasNext()) {
@@ -468,7 +553,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     }
 
     public void disablePlayerInput() {
-        playerInput = true;
+        playerInput = false;
 
         wPressed = false;
         aPressed = false;
