@@ -1,31 +1,29 @@
 
+# 2025 JAVA 期末專案範例
+- 學號：B11107110 姓名：吳亮穎
+- 分工說明：無
+- [報告影片連結](https://youtu.be/gknn1sEPnVY)
 
-# 學號：B11107110 姓名：吳亮穎
+## 遊戲說明
 
-# 分工說明：無
-
-# [報告影片連結](https://youtu.be/gknn1sEPnVY)
-
-# 遊戲說明
-
-## 1. 遊戲流程
+### 1. 遊戲流程
 - 擊敗敵人獲取經驗
 - 打倒BOSS
 
-## 2. 操作方式
+### 2. 操作方式
 - 玩家移動：WASD
 - 閃避：space
 - 使用道具：R
 - 攻擊：滑鼠瞄準左鍵射擊
 - 與場景互動：E
 
-# 指令及執行檔說明
+## 指令及執行檔說明
 
-## 下載完整repo後開啟Terminal執行以下指令
+### 下載完整repo後開啟Terminal執行以下指令
 - cd exe
 - java -jar SpaceInvader.jar
 
-# 檔案結構
+## 檔案結構
 ```
 Space_Invader/
 ├── src/
