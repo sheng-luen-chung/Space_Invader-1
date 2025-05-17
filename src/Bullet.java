@@ -1,53 +1,86 @@
 import java.awt.*;
 
 public class Bullet{
-    private double x, y;
-    private int width, height;
-    private Color color;
-    private int speed = 7;
-    private int damage = 20;
-    private double  dx = 0;
-    private double dy = 0;
-    private String tag;
+    public double x, y;
+    public int width, height;
+    public int health;
+    public Color color;
+    public int speed = 7;
+    public int damage = 20;
+    public double  dx = 0;
+    public double dy = 0;
+    public String tag;
+    public MusicPlayer musicPlayer;
 
-    Bullet(int x, int y, int w, int h, Color c, double dx, double dy, int damage, String tag) {
+    public Bullet() {
+        this.x = 0;
+        this.y = 0;
+        this.width = 0;
+        this.height = 0;
+        this.health = 0;
+        this.color = null;
+        this.dx = 0;
+        this.dy = 0;
+        this.speed = 0;
+        this.damage = 0;
+        this.tag = null;
+        this.musicPlayer = null;
+    }
+
+    public Bullet(int x, int y, int w, int h, Color c, double dx, double dy, int speed, int damage, int health, String tag, MusicPlayer musicPlayer) {
         this.x = x;
         this.y = y;
         this.width = w;
         this.height = h;
+        this.health = health;
         this.color = c;
         this.dx = dx;
         this.dy = dy;
+        this.speed = speed;
         this.damage = damage;
         this.tag = tag;
+        this.musicPlayer = musicPlayer;
+        musicPlayer.playSegment("FireBall", 0.0f, 2.0f, false);
     }
 
-    void move() {
+    public void move() {
         x += dx * speed;
         y += dy * speed;
     }
 
-    int getDamage() {
+    public void getHurt(int damage) {
+        health -= damage;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getDamage() {
         return damage;
     }
-
-    boolean outOfScreen() {
-        return (x < 0 || x > Constants.FRAMEWIDTH || y < 0 || y > Constants.FRAMEHEIGHT);
-    }
-
-    int getWidth() {
+    
+    public int getWidth() {
         return width;
     }
 
-    int getHeight() {
+    public int getHeight() {
         return height;
     }
 
-    String getTag() {
+    public double getCenterX() {
+        return x + width / 2;
+    }
+
+    public double getCenterY() {
+        return y + height / 2;
+    }
+
+    public String getTag() {
         return tag;
     }
 
-    void draw(Graphics g) {
+    public void draw(Graphics g) {
         double centerX = x + width / 2;
         double centerY = y + height / 2;
         double _w = (double) (width / 2.4);
@@ -120,7 +153,7 @@ public class Bullet{
         g.fillOval((int) (_x), (int) (_y), (int) (_w), (int) (_h));
     }
 
-    Rectangle getBounds() {
+    public Rectangle getBounds() {
         return new Rectangle((int) x, (int) y, width, height);
     }
 }

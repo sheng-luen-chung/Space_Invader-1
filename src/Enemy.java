@@ -28,6 +28,7 @@ public class Enemy{
     public int knockBackTimer = 0;
 
     public int detectZone = 0;
+    public boolean meleeAttack = false;
 
     public Enemy() {
         this.x = 100;
@@ -168,6 +169,10 @@ public class Enemy{
 
     public boolean isAttacking() {
         return attacking;
+    }
+    
+    public boolean isMeleeAttack() {
+        return meleeAttack;
     }
 
     public Rectangle getBounds() {

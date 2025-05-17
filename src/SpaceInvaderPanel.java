@@ -1,9 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.*;
 
 public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyListener, MouseListener{
@@ -28,11 +27,11 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     private final int spawnEnemiesMinDelay = 9000;
     private int spawnEnemiesDelay = 10000;
     private int spawnEnemiesStep = 500;
-    private final int bigTriangleDelay = 10000;
-    private boolean stopSpawmEnemies = false;
-    private boolean enemyFall = false;
 
-    private boolean changeMusic = false;
+    private final int bigTriangleDelay = 10000;
+
+    private boolean stopSpawmEnemies = false;
+    private boolean enemyFelled = false;
 
     private boolean wPressed = false;
     private boolean aPressed = false;
@@ -76,14 +75,24 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         timer2 = new Timer(bigTriangleDelay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enemies.add(new BigTriangle(640, 40, 
-                                            60, (int) (60 * 1.732 / 2), 
-                                            Color.red, 
-                                            (int) (20 * Math.pow(1.25, Constants.nRuns + 1)), 
-                                            (int) (1000 * Math.pow((Constants.nRuns + 1), 1.2)), 
-                                            Constants.BIGTRIANGLEDETECTZONE));
-                musicPlayer.stopById("BigTriangle");
-                musicPlayer.playSegment("BigTriangle", 0, 105, true);
+                // if (Constants.nRuns % 2 == 0) {
+                //     enemies.add(new BigTriangle(640, 40, 
+                //                                 60, (int) (60 * 1.732 / 2), 
+                //                                 Color.red, 
+                //                                 (int) (Constants.BIGTRIANGLEBASEATTACKDAMAGE * Math.pow(1.25, Constants.nRuns + 1)), 
+                //                                 (int) (Constants.BIGTRIANGLEBASEHEALTH / 5 * Math.pow((Constants.nRuns + 1), 1.2)), 
+                //                                 Constants.BIGTRIANGLEDETECTZONE, 
+                //                                 musicPlayer));
+                // }
+                // else if (Constants.nRuns % 2 == 1) {
+                //     enemies.add(new BigSquare(640, 40, 
+                //                                 60, (int) (60 * 1.732 / 2), 
+                //                                 Color.red, 
+                //                                 (int) (Constants.BIGSQUAREBASEATTACKDAMAGE * Math.pow(1.25, Constants.nRuns + 1)), 
+                //                                 (int) (Constants.BIGSQUAREBASEHEALTH / 5 * Math.pow((Constants.nRuns + 1), 1.2)), 
+                //                                 Constants.BIGTRIANGLEDETECTZONE, 
+                //                                 musicPlayer));
+                // }
                 timer2.stop();
             }
         });
@@ -92,8 +101,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             public void actionPerformed(ActionEvent e) {
                 musicPlayer.adjustVolume(-1);
                 if (musicPlayer.getCurrentVolume() < 1){
-                    System.out.println("Big Triangle");
                     musicPlayer.stopById("BigTriangle");
+                    musicPlayer.stopById("BigSquare");
                     musicPlayer.adjustVolume(10);
                     timer3.stop();
                 }
@@ -116,16 +125,18 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
     }
 
     void spawnEnemies() {
-        enemies.add(new Square(200, 200, 
-                                50, 
-                                50, 
-                                Color.red, 
-                                (int) (15 * Math.pow(1.25, Constants.nRuns + 1)), 
-                                (int) (50 * Math.pow(1.1, Constants.nRuns)), 
-                                Constants.TRIANGLEDETECTZONE));
+        if (enemies.isEmpty()) {
+            enemies.add(new BigSquare(640, 40, 
+                                                60, (int) (60 * 1.732 / 2), 
+                                                Color.red, 
+                                                (int) (Constants.BIGSQUAREBASEATTACKDAMAGE * Math.pow(1.25, Constants.nRuns + 1)), 
+                                                (int) (Constants.BIGSQUAREBASEHEALTH / 5 * Math.pow((Constants.nRuns + 1), 1.2)), 
+                                                Constants.BIGTRIANGLEDETECTZONE, 
+                                                musicPlayer));
+        }
         // Random rand = new Random();
         // int x = 0, y = 0;
-        // int times = 11 - spawnEnemiesDelay / 1000 + rand.nextInt(3);
+        // int times = 11 - spawnEnemiesDelay / 1000 + rand.nextInt(3) + Constants.nRuns;
 
         // for (int a = 0; a < times; a++) {
         //     int side = rand.nextInt(4); // 0 = top, 1 = bottom, 2 = left, 3 = right
@@ -148,13 +159,26 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         //             y = rand.nextInt(Constants.FRAMEHEIGHT);
         //             break;
         //     }
-        //     enemies.add(new Triangle(x, y, 
-        //                                 Constants.TRIANGLEWIDTH, 
-        //                                 Constants.TRIANGLEHEIGHT, 
-        //                                 Color.red, 
-        //                                 (int) (15 * Math.pow(1.25, Constants.nRuns + 1)), 
-        //                                 (int) (50 * Math.pow(1.1, Constants.nRuns)), 
-        //                                 Constants.TRIANGLEDETECTZONE));
+
+        //     if (Math.random() < 0.7) {
+        //         enemies.add(new Triangle(x, y, 
+        //                                  Constants.TRIANGLEWIDTH, 
+        //                                  Constants.TRIANGLEHEIGHT, 
+        //                                  Color.red, 
+        //                                  (int) (Constants.TRIANGLEBASEATTACKDAMAGE * Math.pow(1.25, Constants.nRuns + 1)), 
+        //                                  (int) (Constants.TRIANGLEBASEHEALTH * Math.pow(1.1, Constants.nRuns)), 
+        //                                  Constants.TRIANGLEDETECTZONE));
+        //     }
+        //     else {              
+        //         enemies.add(new Square(x, y,  
+        //                                Constants.SQUAREWIDTH, 
+        //                                Constants.SQUAREHEIGHT, 
+        //                                Color.red, 
+        //                                (int) (Constants.SQUAREBASEATTACKDAMAGE * Math.pow(1.25, Constants.nRuns + 1)), 
+        //                                (int) (Constants.SQUAREBASEHEALTH * Math.pow(1.1, Constants.nRuns)), 
+        //                                Constants.SQUAREDETECTZONE, 
+        //                                musicPlayer));
+        //     }
         // }
     }
 
@@ -201,14 +225,13 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
             for (Enemy enemy : enemies) {
                 if (enemy instanceof BigTriangle bt) {
                     enemiesToAdd.addAll(bt.enemiesToAdd);
-                    if (bt.getPhase() == 1 && !changeMusic) {
-                        musicPlayer.stopById("BigTriangle");
-                        musicPlayer.playSegment("BigTriangle", 105, 245, true);
-                        changeMusic = true;
-                    }
                     bt.enemiesToAdd.clear();
                 }
                 else if (enemy instanceof Square s) {
+                    bulletsToAdd.addAll(s.bulletsToAdd);
+                    s.bulletsToAdd.clear();
+                }
+                else if (enemy instanceof BigSquare s) {
                     bulletsToAdd.addAll(s.bulletsToAdd);
                     s.bulletsToAdd.clear();
                 }
@@ -220,6 +243,10 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
             for(Bullet bullet : bullets) {
                 bullet.move();
+            }
+            
+            for(Coin coin : coins) {
+                coin.move(player.getCenterX(), player.getCenterY());
             }
             
             deleteOutOfScreenBullets();
@@ -239,9 +266,11 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                                            Color.YELLOW, 
                                            bulletDx, 
                                            bulletDy, 
-                                           (int) (Constants.playerActualSTR * 10), 
-                                           "Player"));
-                    musicPlayer.playSegment("FireBall", 0.0f, 2.0f, false);
+                                           7, 
+                                           (int) (Constants.PLAYERBASEATTACK + Constants.playerActualSTR * 10), 
+                                           100, 
+                                           "Player", 
+                                           musicPlayer));
                     player.attack();
                 }
                 mouseLeftClicked = 0;
@@ -296,7 +325,6 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                     pauseGame();
                     showBonfireText = false;
                     inBonfire = true;
-                    changeMusic = false;
                     levelUpPanel.setOpaque(false);
                     levelUpPanel.setVisible(true);
                     musicPlayer.stopAll();
@@ -337,6 +365,12 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         while (bullet.hasNext()) {
             Bullet b = bullet.next();
             Rectangle bRect = b.getBounds();
+            
+            b.getHurt(1);
+            if (b.getHealth() <= 0) {
+                bullet.remove();
+                break;
+            }
 
             if ("Player".equals(b.getTag())) {
                 Iterator<Enemy> enemy = enemies.iterator();
@@ -354,8 +388,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                                                  b.getWidth(), 
                                                  b.getHeight(), 
                                                  Color.RED, 
-                                                 100, 
-                                                 15, 
+                                                 5, 
+                                                 b.getDamage(), 
                                                  "Player"));
                         bullet.remove();
                         break;
@@ -374,8 +408,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                                              b.getWidth(), 
                                              b.getHeight(), 
                                              Color.RED, 
-                                             100, 
-                                             15, 
+                                             5, 
+                                             b.getDamage(), 
                                              "Enemy"));
                     bullet.remove();
                     break;
@@ -389,7 +423,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         Iterator<Explode> explode = explodes.iterator(); // explode & enemy
         while (explode.hasNext()) {
             Explode b = explode.next();
-            b.getHurt(20);
+            b.getHurt(1);
             if (b.getHealth() <= 0) {
                 explode.remove();
             }
@@ -402,18 +436,19 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
                     Rectangle eRect = e.getBounds();
                     if (bRect.intersects(eRect)) {
-                        e.getHurt(b.getDamage());
-                        e.knockBack(b.getCenterX(), b.getCenterY(), 10, 10);
+                        int damage = b.getDamage();
+                        e.getHurt(damage);
+                        e.knockBack(b.getCenterX(), b.getCenterY(), Math.min(20, damage / 3), 10);
                         if (e.getHealth() <= 0) {
                             for (int a = (int) (e.getMaxHealth()); a > 0; a-= 20) {
                                 int offsetX = (int)(Math.random() * 100 - 50);
                                 int offsetY = (int)(Math.random() * 100 - 50);
                                 coins.add(new Coin(e.getCenterX() + offsetX, e.getCenterY() + offsetY, (int) (8 + Math.random() * 4)));
                             }
-                            if (e instanceof BigTriangle) {
+                            if (e instanceof BigTriangle || e instanceof BigSquare) {
                                 timer3.start();
-                                enemyFall = true;
-                                Constants.nRuns = Math.min(Constants.nRuns + 1, 10);
+                                enemyFelled = true;
+                                Constants.nRuns = Math.min(Constants.nRuns + 1, 9);
                             }
                             enemy.remove();
                             musicPlayer.playSegment("Kill", 0.0f, 1f, false);
@@ -427,7 +462,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
                     if (!player.isKnockBacking() && !player.isInvincible()){
                         int damage = b.getDamage();
                         player.getHurt(damage);
-                        player.knockBack(b.getCenterX(), b.getCenterY(), damage / 3, 30);
+                        player.knockBack(b.getCenterX(), b.getCenterY(), Math.min(20, damage / 3), 30);
                         if (player.getHealth() <= 0 && !isGameOver) {
                             disablePlayerInput();
                             isGameOver = true;
@@ -444,14 +479,14 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         while (enemy.hasNext()) {
             Enemy e = enemy.next();
 
-            if (e.isAttacking()) {
+            if (e.isAttacking() && e.isMeleeAttack()) {
                 Rectangle pRect = player.getBounds();
                 Rectangle eRect = e.getBounds();
                 if (pRect.intersects(eRect)) {
                     if (!player.isKnockBacking() && !player.isInvincible()){
                         int damage = e.getDamage();
                         player.getHurt(damage);
-                        player.knockBack(e.getCenterX(), e.getCenterY(), damage / 3, 30);
+                        player.knockBack(e.getCenterX(), e.getCenterY(), Math.min(20, damage / 3), 30);
                         if (player.getHealth() <= 0 && !isGameOver) {
                             disablePlayerInput();
                             isGameOver = true;
@@ -481,7 +516,8 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
         Iterator<Bullet> bullet = bullets.iterator();
         while (bullet.hasNext()) {
             Bullet b = bullet.next();
-            if (b.outOfScreen()) {
+            if (b.getCenterX() < -500 || b.getCenterX() > Constants.FRAMEWIDTH + 500 || 
+                b.getCenterY() < -500 || b.getCenterY() > Constants.FRAMEHEIGHT + 500) {
                 bullet.remove();
             }
         }
@@ -493,11 +529,11 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
     public void resumeGame() {
         paused = false;
-        if (stopSpawmEnemies && !enemyFall) timer2.start();
-        else if (!stopSpawmEnemies && enemyFall) timer4.start();
+        if (stopSpawmEnemies && !enemyFelled) timer2.start();
+        else if (!stopSpawmEnemies && enemyFelled) timer4.start();
         else {
             stopSpawmEnemies = false;
-            enemyFall = false;
+            enemyFelled = false;
             timer4.start();
         }
     }
@@ -531,8 +567,7 @@ public class SpaceInvaderPanel extends JPanel implements ActionListener, KeyList
 
         spawnEnemiesDelay = spawnEnemiesMaxDelay;
         stopSpawmEnemies = false;
-        enemyFall = false;
-        changeMusic = false;
+        enemyFelled = false;
 
         wPressed = false;
         aPressed = false;

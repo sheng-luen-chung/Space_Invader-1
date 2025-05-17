@@ -8,6 +8,7 @@ public class Constants {
     public static final int PLAYERMAXLEVEL = 99;
     public static final int PLAYERESTUSNUM = 5;
     public static final int PLAYERINITIALEXP = 0;
+    public static final int PLAYERBASEATTACK = 10;
 
     private static final int PLAYERBASEHP = 100;
     public static int playerHPLevel = 10;
@@ -33,6 +34,20 @@ public class Constants {
 
     public static final int TRIANGLEWIDTH = 50;
     public static final int TRIANGLEHEIGHT = (int) (TRIANGLEWIDTH * 1.732 / 2);
+    public static final int SQUAREWIDTH = 50;
+    public static final int SQUAREHEIGHT = SQUAREWIDTH;
+    
+    public static final int SMALLTRIANGLEBASEATTACKDAMAGE = 10;
+    public static final int TRIANGLEBASEATTACKDAMAGE = 15;
+    public static final int BIGTRIANGLEBASEATTACKDAMAGE = 20;
+    public static final int SQUAREBASEATTACKDAMAGE = 15;
+    public static final int BIGSQUAREBASEATTACKDAMAGE = 20;
+
+    public static final int SMALLTRIANGLEBASEHEALTH = 1;
+    public static final int TRIANGLEBASEHEALTH = 50;
+    public static final int BIGTRIANGLEBASEHEALTH = 1000;
+    public static final int SQUAREBASEHEALTH = 40;
+    public static final int BIGSQUAREBASEHEALTH = 1000;
 
     public static final int TRIANGLEATTACKSTARTTIME = 50;
     public static final int TRIANGLEATTACKENDTIME = 15;
@@ -40,7 +55,23 @@ public class Constants {
 
     public static final int SMALLTRIANGLEDETECTZONE = 1000;
     public static final int TRIANGLEDETECTZONE = 1000;
+    public static final int TRIANGLEATTACKZONE = 100;
     public static final int BIGTRIANGLEDETECTZONE = 10000;
+    public static final int BIGTRIANGLEATTACKZONE = 250;
+
+    public static final int SQUAREATTACKSTARTTIME = 50;
+    public static final int SQUAREATTACKENDTIME = 50;
+    public static final int SQUAREATTACKCOOLDOWN = 250;
+
+    public static final int BIGSQUAREATTACKSTARTTIME = 50;
+    public static final int BIGSQUAREATTACKENDTIME = 50;
+    public static final int BIGSQUAREATTACKCOOLDOWN = 100;
+
+    public static final int SQUAREDETECTZONE = 1000;
+    public static final int SQUAREATTACKZONE = 400;
+    public static final int BIGSQUAREDETECTZONE = 10000;
+    public static final int BIGSQUAREATTACKZONE = 500;
+
 
     private static final double HPK = 0.12;
     private static final double STRK = 0.15;

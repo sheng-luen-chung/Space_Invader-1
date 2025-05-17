@@ -25,10 +25,6 @@ public class Explode {
         this.tag = tag;
     }
 
-    void getHurt(int damage) {
-        currentHealth -= damage;
-    }
-
     void draw(Graphics g) {
         g.setColor(Color.RED);
         double healthPercant = 1 - (double) currentHealth / maxHealth;
@@ -45,8 +41,12 @@ public class Explode {
         g.fillOval((int) (centerX - w / 2), (int) (centerY - h / 2), (int) (w), (int) (h));
     }
 
+    void getHurt(int damage) {
+        currentHealth -= damage;
+    }
+
     int getDamage() {
-        return damage + (int) Constants.playerActualSTR * 10;
+        return damage;
     }
     
     double getCenterX() {

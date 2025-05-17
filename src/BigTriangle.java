@@ -1,6 +1,6 @@
 import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BigTriangle extends Triangle{
     private int phase = 0;
@@ -15,11 +15,15 @@ public class BigTriangle extends Triangle{
 
     private int phaseChangeTimer = 0;
 
-    List<Enemy> enemiesToAdd;
+    public List<Enemy> enemiesToAdd;
+    private MusicPlayer musicPlayer;
 
-    BigTriangle(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone) {
+    BigTriangle(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone, MusicPlayer musicPlayer) {
         super(x, y, w, h, c, attackDamage, health, detectZone);
         this.enemiesToAdd = new ArrayList<>();
+        this.musicPlayer = musicPlayer;
+        musicPlayer.stopById("BigTriangle");
+        musicPlayer.playSegment("BigTriangle", 0, 105, true);
     }
 
     @Override
@@ -37,6 +41,7 @@ public class BigTriangle extends Triangle{
         else {
             getHurting = false;
         }
+        rotate();
     }
     
     @Override
@@ -121,7 +126,7 @@ public class BigTriangle extends Triangle{
                     centerY += dy * speed;
                 }
             }
-            if (distance <= 250) {
+            if (distance <= Constants.BIGTRIANGLEATTACKZONE) {
                 state = 3;
                 double rand = Math.random();
                 if (phase == 0) {
@@ -183,10 +188,12 @@ public class BigTriangle extends Triangle{
         if (phase == 0 && currentHealth < (double) maxHealth / 2) {
             phase = 1;
             phaseChangeTimer = 100;
+            musicPlayer.stopById("BigTriangle");
+            musicPlayer.playSegment("BigTriangle", 105, 245, true);
+            getHurtCounter = 0;
             state = 4;
         }
 
-        rotate();
     }
 
     @Override
@@ -222,6 +229,7 @@ public class BigTriangle extends Triangle{
                     break;
             }
             attacking = true;
+            meleeAttack = true;
             isSummoned = false;
         }
         else {
@@ -256,10 +264,10 @@ public class BigTriangle extends Triangle{
                     moveType = 1;
                 }
                 attacking = false;
+                meleeAttack = false;
                 rotateDirection = Math.random() < 0.5 ? -1 : 1;
             }
         }
-        rotate();
     }
 
     public void statePhaseChange() {
@@ -309,10 +317,6 @@ public class BigTriangle extends Triangle{
         }
     }
 
-    public int getPhase() {
-        return phase;
-    }
-
     @Override
     public void stateKnockBack() {
         if (knockBackTimer > 0){
@@ -320,7 +324,6 @@ public class BigTriangle extends Triangle{
             centerY += knockBackdy * knockBackSpeed;
             knockBackTimer -= 1;
 
-            attackTimer = 0;
             attackStartTime = 0;
             attackEndTime = 0;
             attackCoolDown = 0;
@@ -329,7 +332,6 @@ public class BigTriangle extends Triangle{
             state = 1;
             knockBacking = false;
         }
-        rotate();
     }
 
     @Override
@@ -498,8 +500,8 @@ public class BigTriangle extends Triangle{
                                                20, 
                                                (int) (20 * 1.732 / 2), 
                                                Color.ORANGE, 
-                                               (int) (10 * Math.pow(1.25, Constants.nRuns + 1)), 
-                                               1, 
+                                               (int) (Constants.SMALLTRIANGLEBASEATTACKDAMAGE * Math.pow(1.25, Constants.nRuns + 1)), 
+                                               Constants.SMALLTRIANGLEBASEHEALTH, 
                                                Constants.SMALLTRIANGLEDETECTZONE);
                 enemiesToAdd.add(minion);
                 isSummoned = true;

@@ -11,7 +11,6 @@ public class Triangle extends Enemy{
     public double attackdx = 0;
     public double attackdy = 0;
     public int attackSpeed = 0;
-    public int attackTimer = 0;
     public int attackStartTime = 0;
     public int attackEndTime = 0;
     public int attackCoolDown = 0;
@@ -73,7 +72,7 @@ public class Triangle extends Enemy{
             centerX += dx * speed;
             centerY += dy * speed;
         }
-        if (dxdy <= 100) {
+        if (dxdy <= Constants.TRIANGLEATTACKZONE) {
             state = 3;
         }
         rotate();
@@ -109,6 +108,7 @@ public class Triangle extends Enemy{
             attackEndTime = Constants.TRIANGLEATTACKENDTIME;
             attackCoolDown = Constants.TRIANGLEATTACKCOOLDOWN;
             attacking = true;
+            meleeAttack = true;
         }
         else {
             if (attackStartTime > 0) {
@@ -138,6 +138,7 @@ public class Triangle extends Enemy{
             else {
                 state = 1;
                 attacking = false;
+                meleeAttack = false;
             }
         }
         rotate();

@@ -7,22 +7,26 @@ public class Square extends Enemy {
     public double centerY = 0;
     public double dx = 0;
     public double dy = 0;
-    public double bulletDx = 0;
-    public double bulletDy = 0;
     public int[] xPoints = new int[4];
     public int[] yPoints = new int[4];
 
+    public double bulletDx = 0;
+    public double bulletDy = 0;
     public double attackdx = 0;
     public double attackdy = 0;
     public int attackSpeed = 0;
-    public int attackTimer = 0;
     public int attackStartTime = 0;
     public int attackEndTime = 0;
     public int attackCoolDown = 0;
+    public boolean attacked = false;
+    private int rotateDirection = -1;
+    public int faceDirection = 0;
 
     List<Bullet> bulletsToAdd;
+    
+    private MusicPlayer musicPlayer;
 
-    Square(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone) {
+    Square(int x, int y, int w, int h, Color c, int attackDamage, int health, int detectZone, MusicPlayer musicPlayer) {
         super(x, y, w, h, c, attackDamage, health, detectZone);
         this.centerX = x + w / 2.0;
         this.centerY = y + h / 2.0;
@@ -32,6 +36,7 @@ public class Square extends Enemy {
             yPoints[i] = (int) (centerY + Math.sin(currentAngle) * height / Math.sqrt(2));
         }
         this.bulletsToAdd = new ArrayList<>();
+        this.musicPlayer = musicPlayer;
     }
 
     @Override
@@ -48,6 +53,7 @@ public class Square extends Enemy {
         else {
             getHurting = false;
         }
+        rotate();
     }
 
     @Override
@@ -74,13 +80,26 @@ public class Square extends Enemy {
         if (dxdy != 0) {
             dx /= dxdy;
             dy /= dxdy;
-            centerX += dx * speed;
-            centerY += dy * speed;
+            if (!attacked) {
+                centerX += dx * speed;
+                centerY += dy * speed;
+            }
+            else {
+                centerX -= dy * speed * rotateDirection / 2;
+                centerY += dx * speed * rotateDirection / 2;
+            }
         }
-        if (dxdy <= 100) {
+        if (dxdy <= Constants.SQUAREATTACKZONE && !attacked) {
             state = 3;
         }
-        rotate();
+        if (attackCoolDown > 0) {
+            attackCoolDown -= 1;
+        }
+        else {
+            attacking = false;
+            attacked = false;
+            rotateDirection = Math.random() < 0.5 ? -1 : 1;
+        }
     }
 
     @Override
@@ -95,42 +114,74 @@ public class Square extends Enemy {
             state = 1;
             knockBacking = false;
         }
-        rotate();
     }
 
     @Override
     public void stateAttack(double playerX, double playerY) {
-        centerX = getCenterX();
-        centerY = getCenterY();
-        bulletDx = playerX - centerX;
-        bulletDy = playerY - centerY;
-        double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
-        if (dxdy != 0) {
-            bulletDx /= dxdy;
-            bulletDy /= dxdy;
+        if (!attacking) {
+            centerX = getCenterX();
+            centerY = getCenterY();
+            bulletDx = playerX - centerX;
+            bulletDy = playerY - centerY;
+            double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
+            if (dxdy != 0) {
+                bulletDx /= dxdy;
+                bulletDy /= dxdy;
+            }
+            attackStartTime = Constants.SQUAREATTACKSTARTTIME;
+            attackCoolDown = Constants.SQUAREATTACKCOOLDOWN;
+            attacking = true;
+            faceDirection = 1;
         }
-        Bullet b = new Bullet((int) getCenterX(), 
-                              (int) getCenterY(), 
-                              20, 20, 
-                              Color.YELLOW, 
-                              bulletDx, 
-                              bulletDy, 
-                              10, 
-                              "Enemy");
-        bulletsToAdd.add(b);
-        rotate();
+        else {
+            if (attackStartTime > 0) {
+                if (attackStartTime % 10 >= 5) {
+                    color = Color.WHITE;
+                }
+                else {
+                    color = oriColor;
+                }
+                attackStartTime -= 1;
+            }
+            else {
+                if (!attacked) {
+                    Bullet b = new Bullet((int) getCenterX() - 10, 
+                                        (int) getCenterY() - 10, 
+                                        20, 20, 
+                                        Color.YELLOW, 
+                                        bulletDx, 
+                                        bulletDy, 
+                                        7, 
+                                        attackDamage, 
+                                        100, 
+                                        "Enemy", 
+                                        musicPlayer);
+                    bulletsToAdd.add(b);
+                    attacked = true;
+                    state = 1;
+                    faceDirection = 0;
+                }
+            }
+            if (attackCoolDown > 0) {
+                attackCoolDown -= 1;
+            }
+            else {
+                state = 1;
+                attacking = false;
+                attacked = false;
+            }
+        }
     }
 
     @Override
     public void rotate() {
         double angle;
         double radius = height / Math.sqrt(2);
-    
-        if (knockBacking) {
-            angle = Math.atan2(dy, dx);
-        } else if (attacking) {
-            angle = Math.atan2(attackdy, attackdx);
-        } else {
+
+        if (faceDirection == 1) {
+            angle = Math.atan2(bulletDy, bulletDx);
+        }
+        else {
             angle = Math.atan2(dy, dx);
         }
     

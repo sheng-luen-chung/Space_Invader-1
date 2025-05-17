@@ -12,6 +12,7 @@ public class MusicPlayer {
         load("YouDied", "music/YouDied.wav", 1);
         load("Bonfire", "music/Bonfire.wav", 1);
         load("BigTriangle", "music/BigTriangle.wav", 1);
+        load("BigSquare", "music/BigSquare.wav", 1);
         load("Estus", "music/Estus.wav", 1);
         load("FireBall", "music/FireBall.wav", 5);  // 可同時播放 5 個 FireBall
         load("Kill", "music/Kill.wav", 5);
