@@ -116,7 +116,7 @@ public class Player{
 
         if (healingCoolDown > 0){
             if (healingTimer > 0) {
-                currentHealth = Math.min(currentHealth + (int) (Constants.playerActualHP * 0.01), (int) Constants.playerActualHP);
+                currentHealth = Math.min(currentHealth + (int) (Constants.getActualHP() * 0.01), (int) Constants.playerActualHP);
                 healingTimer -= 1;
             }
             healingCoolDown -= 1;
