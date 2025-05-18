@@ -37,7 +37,6 @@ public class StartPanel extends JPanel {
         startButton.addActionListener(e -> {
             this.setVisible(false);
             gamePanel.restartGame(); // 重新啟動遊戲
-            gamePanel.resumeGame();  // 繼續遊戲
             settingsPanel.setBlackBackground(false);
             settingsPanel.showResumeButton(true);
             musicPlayer.stopById("StartMenu");

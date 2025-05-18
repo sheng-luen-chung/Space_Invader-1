@@ -135,7 +135,7 @@ public class BigSquare extends Square{
                 state = 3;
                 double rand = Math.random();
                 if (phase == 0) {
-                    if (rand < 0.8) {
+                    if (rand < 0.6) {
                         attackType = 0;
                     }
                     else {
@@ -144,7 +144,7 @@ public class BigSquare extends Square{
                     attackTypeCounter = 1;
                 }
                 else if (phase == 1) {
-                    if (rand < 0.5) {
+                    if (rand < 0.4) {
                         attackType = 0;
                     }
                     else if (rand < 0.7) {
@@ -156,7 +156,7 @@ public class BigSquare extends Square{
                     attackTypeCounter = 1 + (int) (Math.random() * 3);
                 }
                 else if (phase == 2) {
-                    if (rand < 0.4) {
+                    if (rand < 0.3) {
                         attackType = 0;
                     }
                     else if (rand < 0.6) {
@@ -199,7 +199,7 @@ public class BigSquare extends Square{
         else {
             moveType = (int) (2 * Math.random());
             moveTypeTimer = 100;
-            rotationRadius = 100 + 100 * Math.random();
+            rotationRadius = 200 + 50 * Math.random();
         }
 
         if (phase == 0 && currentHealth < (double) maxHealth / 3 * 2) {
@@ -227,34 +227,42 @@ public class BigSquare extends Square{
     @Override
     public void stateAttack(double playerX, double playerY) {
         if (!attacking) {
-            attackSpeed = 20;
             switch (attackType) {
                 case 0:
-                    if (phase == 0) {
+                    if (phase < 2) {
                         attackStartTime = Constants.BIGSQUAREATTACKSTARTTIME;
                         attackEndTime = Constants.BIGSQUAREATTACKENDTIME;
                         attackCoolDown = Constants.BIGSQUAREATTACKCOOLDOWN;
                     }
                     else {
-                        attackStartTime = (int) (2 * Constants.BIGSQUAREATTACKSTARTTIME);
-                        attackEndTime = Constants.BIGSQUAREATTACKENDTIME;
-                        attackCoolDown = (int) (Constants.BIGSQUAREATTACKCOOLDOWN);
+                        attackStartTime = 2 * Constants.BIGSQUAREATTACKSTARTTIME;
+                        attackEndTime = 1;
+                        attackCoolDown = (int) (1.5 * Constants.BIGSQUAREATTACKCOOLDOWN);
                     }
                     break;
                 case 1:
-                    attackStartTime = (int) (2 * Constants.BIGSQUAREATTACKSTARTTIME);
-                    attackEndTime = (int) (2 * Constants.BIGSQUAREATTACKENDTIME);
-                    attackCoolDown = (int) (1.5 * Constants.BIGSQUAREATTACKCOOLDOWN);
+                    if (phase < 2) {
+                        attackStartTime = (int) (2 * Constants.BIGSQUAREATTACKSTARTTIME);
+                        attackEndTime = (int) (Constants.BIGSQUAREATTACKENDTIME);
+                        attackCoolDown = (int) (1.5 * Constants.BIGSQUAREATTACKCOOLDOWN);
+                    }
+                    else {
+                        attackStartTime = (int) (3 * Constants.BIGSQUAREATTACKSTARTTIME);
+                        attackEndTime = (int) (2 * Constants.BIGSQUAREATTACKENDTIME);
+                        attackCoolDown = (int) (2 * Constants.BIGSQUAREATTACKCOOLDOWN);
+                    }
                     break;
                 case 2:
-                    attackStartTime = (int) (Constants.BIGSQUAREATTACKSTARTTIME / 2);
-                    attackEndTime = (int) ((2 + phase) * Constants.BIGSQUAREATTACKENDTIME);
-                    attackCoolDown = (int) (Constants.BIGSQUAREATTACKCOOLDOWN);
+                    if (phase < 2) {
+                        attackStartTime = (int) (Constants.BIGSQUAREATTACKSTARTTIME);
+                        attackEndTime = (int) ((3 + phase * 2) * Constants.BIGSQUAREATTACKENDTIME);
+                        attackCoolDown = (int) (Constants.BIGSQUAREATTACKCOOLDOWN);
+                    }
                     break;
                 case 3:
                     attackStartTime = Constants.BIGSQUAREATTACKSTARTTIME;
-                    attackEndTime = Constants.BIGSQUAREATTACKENDTIME;
-                    attackCoolDown = (int) (0.5 * Constants.BIGSQUAREATTACKCOOLDOWN);
+                    attackEndTime = 1;
+                    attackCoolDown = (int) (Constants.BIGSQUAREATTACKCOOLDOWN);
                     break;
             }
             attacking = true;
@@ -273,7 +281,7 @@ public class BigSquare extends Square{
                     sprintShotAttack(playerX, playerY);
                     break;
                 case 3:
-                    ringAttack();
+                    ringAttack(playerX, playerY);
                     break;
                 default:
                     throw new AssertionError();
@@ -292,7 +300,6 @@ public class BigSquare extends Square{
                     rotateDirection *= -1;
                 }
                 attacking = false;
-                attacked = false;
             }
         }
     }
@@ -310,7 +317,6 @@ public class BigSquare extends Square{
         else {
             attackCoolDown = 0;
             attacking = false;
-            attacked = false;
             attackType = 3;
             attackTypeCounter = phase * 2;
             state = 3;
@@ -376,16 +382,220 @@ public class BigSquare extends Square{
             getHurtCounter = 0;
         }
     }
- 
+
     private void shotAttack(double playerX, double playerY) {
+        centerX = getCenterX();
+        centerY = getCenterY();
+        bulletDx = playerX - centerX;
+        bulletDy = playerY - centerY;
+        double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
+        bulletDx /= dxdy;
+        bulletDy /= dxdy;
         if (attackStartTime > 0) {
-            centerX = getCenterX();
-            centerY = getCenterY();
-            bulletDx = playerX - centerX;
-            bulletDy = playerY - centerY;
-            double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
-            bulletDx /= dxdy;
-            bulletDy /= dxdy;
+            if (phase < 2) {
+                if (attackStartTime % 10 >= 5) {
+                    color = Color.WHITE;
+                }
+                else {
+                    color = oriColor;
+                }
+            }
+            else {
+                if (attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6){
+                    color = Color.WHITE;
+                }
+                else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 && 
+                    attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 2) {
+                    color = Color.BLACK;
+                    if (attackStartTime == (int) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 1.5) {
+                        double angle = Math.random() * 2 * Math.PI;
+                        double distance = 150 + Math.random() * 100;
+
+                        centerX = playerX + Math.cos(angle) * distance;
+                        centerY = playerY + Math.sin(angle) * distance;
+                    }
+                }
+                else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 2 && 
+                    attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 5) {
+                    color = Color.WHITE;
+                }
+                else {
+                    color = oriColor;
+                }
+            }
+            attackStartTime -= 1;
+        }
+        else {
+            if (attackEndTime > 0) {
+                if (phase != 2 && attackEndTime % 15 == 0) {
+                    Bullet b1 = new Bullet((int) getCenterX() - 10, 
+                                        (int) getCenterY() - 10, 
+                                        20, 20, 
+                                        Color.YELLOW, 
+                                        bulletDx, 
+                                        bulletDy, 
+                                        7, 
+                                        attackDamage, 
+                                        100, 
+                                        "Enemy", 
+                                        musicPlayer);
+                    bulletsToAdd.add(b1);
+                    if (phase == 1) {
+                        double angle = Math.atan2(bulletDy, bulletDx);
+                        Bullet b2 = new Bullet((int) getCenterX() - 10, 
+                                            (int) getCenterY() - 10, 
+                                            20, 20, 
+                                            Color.YELLOW, 
+                                            Math.cos(angle + Math.PI / 10), 
+                                            Math.sin(angle + Math.PI / 10), 
+                                            7, 
+                                            attackDamage, 
+                                            100, 
+                                            "Enemy", 
+                                            musicPlayer);
+                        bulletsToAdd.add(b2);
+                        Bullet b3 = new Bullet((int) getCenterX() - 10, 
+                                            (int) getCenterY() - 10, 
+                                            20, 20, 
+                                            Color.YELLOW, 
+                                            Math.cos(angle - Math.PI / 10), 
+                                            Math.sin(angle - Math.PI / 10), 
+                                            7, 
+                                            attackDamage, 
+                                            100, 
+                                            "Enemy", 
+                                            musicPlayer);
+                        bulletsToAdd.add(b3);
+                    }
+                }
+                attackEndTime -= 1;
+                if (attackEndTime == 0 && phase == 2) {
+                    Bullet b1 = new Bullet((int) getCenterX() - 10, 
+                                        (int) getCenterY() - 10, 
+                                        20, 20, 
+                                        Color.YELLOW, 
+                                        bulletDx, 
+                                        bulletDy, 
+                                        10, 
+                                        attackDamage, 
+                                        100, 
+                                        "Enemy", 
+                                        musicPlayer);
+                    bulletsToAdd.add(b1);
+                    double angle = Math.atan2(bulletDy, bulletDx);
+                    Bullet b2 = new Bullet((int) getCenterX() - 10, 
+                                        (int) getCenterY() - 10, 
+                                        20, 20, 
+                                        Color.YELLOW, 
+                                        Math.cos(angle + Math.PI / 10), 
+                                        Math.sin(angle + Math.PI / 10), 
+                                        10, 
+                                        attackDamage, 
+                                        100, 
+                                        "Enemy", 
+                                        musicPlayer);
+                    bulletsToAdd.add(b2);
+                    Bullet b3 = new Bullet((int) getCenterX() - 10, 
+                                        (int) getCenterY() - 10, 
+                                        20, 20, 
+                                        Color.YELLOW, 
+                                        Math.cos(angle - Math.PI / 10), 
+                                        Math.sin(angle - Math.PI / 10), 
+                                        10, 
+                                        attackDamage, 
+                                        100, 
+                                        "Enemy", 
+                                        musicPlayer);
+                    bulletsToAdd.add(b3);
+                }
+            }
+        }
+    }
+
+    private void heavyAttack(double playerX, double playerY) {
+        centerX = getCenterX();
+        centerY = getCenterY();
+        bulletDx = playerX - centerX;
+        bulletDy = playerY - centerY;
+        double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
+        bulletDx /= dxdy;
+        bulletDy /= dxdy;
+        if (attackStartTime > 0) {
+            if (phase < 2) {
+                if (attackStartTime % 10 >= 5) {
+                    color = Color.YELLOW;
+                }
+                else {
+                    color = oriColor;
+                }
+            }
+            else {
+                if (attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6){
+                    color = Color.YELLOW;
+                }
+                else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 && 
+                    attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 4) {
+                    color = Color.BLACK;
+                    if (attackStartTime == (int) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 3) {
+                        double angle = Math.random() * 2 * Math.PI;
+                        double distance = 300 + Math.random() * 100;
+
+                        centerX = playerX + Math.cos(angle) * distance;
+                        centerY = playerY + Math.sin(angle) * distance;
+                    }
+                }
+                else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 4 && 
+                    attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 5) {
+                    color = Color.YELLOW;
+                }
+                else {
+                    color = oriColor;
+                }
+            }
+            attackStartTime -= 1;
+        }
+        else {
+            if (attackEndTime > 0) {
+                if (attackEndTime % 10 == 0) {
+                    Bullet b = new Bullet((int) getCenterX() - 20, 
+                                        (int) getCenterY() - 20, 
+                                        40, 40, 
+                                        Color.YELLOW, 
+                                        bulletDx, 
+                                        bulletDy, 
+                                        12, 
+                                        attackDamage, 
+                                        100, 
+                                        "Enemy", 
+                                        musicPlayer);
+                    bulletsToAdd.add(b);
+                }
+                faceDirection = 0;
+                attackEndTime -= 1;
+            }
+        }
+    }
+
+    private void sprintShotAttack(double playerX, double playerY) {
+        centerX = getCenterX();
+        centerY = getCenterY();
+        bulletDx = playerX - centerX;
+        bulletDy = playerY - centerY;
+        double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
+        bulletDx /= dxdy;
+        bulletDy /= dxdy;
+        centerX -= rotateDirection * bulletDy * speed * 3;
+        centerY += rotateDirection * bulletDx * speed * 3;
+        double radialDir = (dxdy > rotationRadius) ? -1 : 1;
+        if (dxdy - rotationRadius > 10) {
+            centerX -= bulletDx * speed * radialDir;
+            centerY -= bulletDy * speed * radialDir;
+        }
+        else {
+            centerX += bulletDx * speed * radialDir;
+            centerY += bulletDy * speed * radialDir;
+        }
+        if (attackStartTime > 0) {
             if (phase < 2) {
                 if (attackStartTime % 10 >= 5) {
                     color = Color.WHITE;
@@ -401,11 +611,13 @@ public class BigSquare extends Square{
                 else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 && 
                     attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 4) {
                     color = Color.BLACK;
-                    double angle = Math.random() * 2 * Math.PI;
-                    double distance = 150 + Math.random() * 100;
+                    if (attackStartTime == (int) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 3) {
+                        double angle = Math.random() * 2 * Math.PI;
+                        double distance = 150 + Math.random() * 100;
 
-                    centerX = playerX + Math.cos(angle) * distance;
-                    centerY = playerY + Math.sin(angle) * distance;
+                        centerX = playerX + Math.cos(angle) * distance;
+                        centerY = playerY + Math.sin(angle) * distance;
+                    }
                 }
                 else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 4 && 
                     attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 5) {
@@ -415,200 +627,97 @@ public class BigSquare extends Square{
                     color = oriColor;
                 }
             }
-            attacked = false;
             attackStartTime -= 1;
         }
         else {
-            if (!attacked) {
-                Bullet b1 = new Bullet((int) getCenterX() - 10, 
-                                    (int) getCenterY() - 10, 
-                                    20, 20, 
-                                    Color.YELLOW, 
-                                    bulletDx, 
-                                    bulletDy, 
-                                    7, 
-                                    attackDamage, 
-                                    100, 
-                                    "Enemy", 
-                                    musicPlayer);
-                bulletsToAdd.add(b1);
-                if (phase > 0) {
-                    double angle = Math.atan2(bulletDy, bulletDx);
-                    Bullet b2 = new Bullet((int) getCenterX() - 10, 
-                                        (int) getCenterY() - 10, 
-                                        20, 20, 
-                                        Color.YELLOW, 
-                                        Math.cos(angle + Math.PI / 10), 
-                                        Math.sin(angle + Math.PI / 10), 
-                                        7, 
-                                        attackDamage, 
-                                        100, 
-                                        "Enemy", 
-                                        musicPlayer);
-                    bulletsToAdd.add(b2);
-                    Bullet b3 = new Bullet((int) getCenterX() - 10, 
-                                        (int) getCenterY() - 10, 
-                                        20, 20, 
-                                        Color.YELLOW, 
-                                        Math.cos(angle - Math.PI / 10), 
-                                        Math.sin(angle - Math.PI / 10), 
-                                        7, 
-                                        attackDamage, 
-                                        100, 
-                                        "Enemy", 
-                                        musicPlayer);
-                    bulletsToAdd.add(b3);
-                }
-                attacked = true;
-            }
-        }
-    }
-
-    private void heavyAttack(double playerX, double playerY) {
-        if (attackStartTime > 0) {
-            centerX = getCenterX();
-            centerY = getCenterY();
-            bulletDx = playerX - centerX;
-            bulletDy = playerY - centerY;
-            double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
-            bulletDx /= dxdy;
-            bulletDy /= dxdy;
-            if (attackStartTime % 10 >= 5) {
-                color = Color.YELLOW;
-            }
-            else {
-                color = oriColor;
-            }
-            attackStartTime -= 1;
-        }
-        else {
-            if (!attacked) {
-                Bullet b = new Bullet((int) getCenterX() - 20, 
-                                    (int) getCenterY() - 20, 
-                                    40, 40, 
-                                    Color.YELLOW, 
-                                    bulletDx, 
-                                    bulletDy, 
-                                    12, 
-                                    attackDamage, 
-                                    100, 
-                                    "Enemy", 
-                                    musicPlayer);
-                bulletsToAdd.add(b);
-                attacked = true;
-                state = 1;
-                faceDirection = 0;
-            }
-            if (attackCoolDown > 0) {
-                attackCoolDown -= 1;
-            }
-            else {
-                state = 1;
-                attacking = false;
-                attacked = false;
-            }
-        }
-    }
-
-    private void sprintShotAttack(double playerX, double playerY) {
-        centerX = getCenterX();
-        centerY = getCenterY();
-        bulletDx = playerX - centerX;
-        bulletDy = playerY - centerY;
-        double dxdy = Math.sqrt(bulletDx * bulletDx + bulletDy * bulletDy);
-        bulletDx /= dxdy;
-        bulletDy /= dxdy;
-        centerX -= rotateDirection * bulletDy * attackSpeed / 3;
-        centerY += rotateDirection * bulletDx * attackSpeed / 3;
-        if (attackStartTime > 0) {
-            attackStartTime -= 1;
-        }
-        else {
-            if (attackStartTime % 10 >= 5) {
-                color = Color.WHITE;
-            }
-            else {
-                color = oriColor;
-            }
             if (attackEndTime > 0) {
-                if (attackEndTime % 10 == 0) {
+                if (attackEndTime % 7 == 0) {
                     Bullet b1 = new Bullet((int) getCenterX() - 10, 
                                         (int) getCenterY() - 10, 
                                         20, 20, 
                                         Color.YELLOW, 
                                         bulletDx, 
                                         bulletDy, 
-                                        7, 
-                                        attackDamage, 
-                                        100, 
+                                        12, 
+                                        (int) (attackDamage / 1.5), 
+                                        500, 
                                         "Enemy", 
                                         musicPlayer);
                     bulletsToAdd.add(b1);
                 }
                 attackEndTime -= 1;
             }
-            else {
-                if (!attacked) {
-                    Bullet b1 = new Bullet((int) getCenterX() - 10, 
-                                        (int) getCenterY() - 10, 
-                                        20, 20, 
-                                        Color.YELLOW, 
-                                        bulletDx, 
-                                        bulletDy, 
-                                        7, 
-                                        attackDamage, 
-                                        100, 
-                                        "Enemy", 
-                                        musicPlayer);
-                    bulletsToAdd.add(b1);
-                    attacked = true;
-                }
-            }
         }
     }
 
-    private void ringAttack() {
+    private void ringAttack(double playerX, double playerY) {
         if (phaseChangeAttack) attackStartTime = 0;
-        if (attackStartTime > 0 || !phaseChangeAttack) {
-            if (attackStartTime % 10 >= 5) {
-                color = Color.PINK;
+        if (attackStartTime > 0) {
+            if (phase < 2) {
+                if (attackStartTime % 10 >= 5) {
+                    color = Color.PINK;
+                }
+                else {
+                    color = oriColor;
+                }
             }
             else {
-                color = oriColor;
+                if (attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6){
+                    color = Color.PINK;
+                }
+                else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 && 
+                    attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 4) {
+                    color = Color.BLACK;
+                    if (attackStartTime == (int) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 3) {
+                        double angle = Math.random() * 2 * Math.PI;
+                        double distance = 150 + Math.random() * 100;
+
+                        centerX = playerX + Math.cos(angle) * distance;
+                        centerY = playerY + Math.sin(angle) * distance;
+                    }
+                }
+                else if (attackStartTime >= (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 4 && 
+                    attackStartTime < (double) Constants.BIGSQUAREATTACKSTARTTIME / 6 * 5) {
+                    color = Color.PINK;
+                }
+                else {
+                    color = oriColor;
+                }
             }
-            attacked = false;
             attackStartTime -= 1;
         }
         else {
-            double angle = 0;
-            for (int c = 0; c < phase; c++) {
-                for (int a = 0; a < 10; a++) {
-                    Bullet b = new Bullet((int) getCenterX() - 10, 
-                                        (int) getCenterY() - 10, 
-                                        20, 20, 
-                                        Color.YELLOW, 
-                                        Math.cos(angle + (Math.PI / 5) * a), 
-                                        Math.sin(angle + (Math.PI / 5) * a), 
-                                        7, 
-                                        attackDamage, 
-                                        100, 
-                                        "Enemy", 
-                                        musicPlayer);
-                    bulletsToAdd.add(b);
-                }
-                angle += Math.PI / 10;
-            }
-            if (phaseChangeAttack) {
-                phaseChangeAttack = false;
-                attackStartTime = 0;
-                attackEndTime = 0;
-                attackCoolDown = 0;
-                attackType = (phase == 2) ? 0 : 2;
-                attackTypeCounter = phase * 2;
-                state = 3;
+            if (attackEndTime > 0) {
+                attackEndTime -= 1;
             }
             else {
-                state = 1;
+                double angle = 0;
+                for (int c = 0; c < phase; c++) {
+                    for (int a = 0; a < 10; a++) {
+                        Bullet b = new Bullet((int) getCenterX() - 10, 
+                                            (int) getCenterY() - 10, 
+                                            20, 20, 
+                                            Color.YELLOW, 
+                                            Math.cos(angle + (Math.PI / 5) * a), 
+                                            Math.sin(angle + (Math.PI / 5) * a), 
+                                            7, 
+                                            attackDamage, 
+                                            100, 
+                                            "Enemy", 
+                                            musicPlayer);
+                        bulletsToAdd.add(b);
+                    }
+                    angle += Math.PI / 10;
+                }
+                if (phaseChangeAttack) {
+                    phaseChangeAttack = false;
+                    attackType = (phase == 2) ? 0 : 2;
+                    attackTypeCounter = phase * 2 + 1;
+                    state = 3;
+                }
+                else {
+                    state = 1;
+                }
             }
         }
     }

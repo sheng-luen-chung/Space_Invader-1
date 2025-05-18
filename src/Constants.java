@@ -30,7 +30,7 @@ public class Constants {
     public static int levelUpCost = 0;
     public static float currentVolume = 10.0f;
 
-    public static int nRuns = 0;
+    public static int nRuns = 1;
 
     public static final int TRIANGLEWIDTH = 50;
     public static final int TRIANGLEHEIGHT = (int) (TRIANGLEWIDTH * 1.732 / 2);
@@ -47,7 +47,7 @@ public class Constants {
     public static final int TRIANGLEBASEHEALTH = 50;
     public static final int BIGTRIANGLEBASEHEALTH = 1000;
     public static final int SQUAREBASEHEALTH = 40;
-    public static final int BIGSQUAREBASEHEALTH = 1000;
+    public static final int BIGSQUAREBASEHEALTH = 700;
 
     public static final int TRIANGLEATTACKSTARTTIME = 50;
     public static final int TRIANGLEATTACKENDTIME = 15;
