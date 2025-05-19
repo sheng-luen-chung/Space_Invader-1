@@ -156,6 +156,7 @@ public class BigSquare extends Square{
                     attackTypeCounter = 1 + (int) (Math.random() * 3);
                 }
                 else if (phase == 2) {
+                    attackTypeCounter = 2 + (int) (Math.random() * 2);
                     if (rand < 0.3) {
                         attackType = 0;
                     }
@@ -167,8 +168,8 @@ public class BigSquare extends Square{
                     }
                     else {
                         attackType = 3;
+                        attackTypeCounter = 1;
                     }
-                    attackTypeCounter = 2 + (int) (Math.random() * 2);
                 }
             }
         }
@@ -260,7 +261,7 @@ public class BigSquare extends Square{
                     }
                     break;
                 case 3:
-                    attackStartTime = Constants.BIGSQUAREATTACKSTARTTIME;
+                    attackStartTime = (int) (Constants.BIGSQUAREATTACKSTARTTIME);
                     attackEndTime = 1;
                     attackCoolDown = (int) (Constants.BIGSQUAREATTACKCOOLDOWN);
                     break;
@@ -316,9 +317,7 @@ public class BigSquare extends Square{
         }
         else {
             attackCoolDown = 0;
-            attacking = false;
             attackType = 3;
-            attackTypeCounter = phase * 2;
             state = 3;
         }
     }
@@ -651,7 +650,9 @@ public class BigSquare extends Square{
     }
 
     private void ringAttack(double playerX, double playerY) {
-        if (phaseChangeAttack) attackStartTime = 0;
+        if (phaseChangeAttack) {
+            attackStartTime = 0;
+        }
         if (attackStartTime > 0) {
             if (phase < 2) {
                 if (attackStartTime % 10 >= 5) {
@@ -716,6 +717,9 @@ public class BigSquare extends Square{
                     state = 3;
                 }
                 else {
+                    attackType = (phase == 2) ? 0 : 2;
+                    attackTypeCounter = phase * 2 + 1;
+                    attackTypeCounter = 1;
                     state = 1;
                 }
             }
